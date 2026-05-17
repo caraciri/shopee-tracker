@@ -176,6 +176,7 @@ tbody td.num{text-align:right;font-family:var(--mono);font-size:12px}
     </div>
     <div class="url-row">
       <input type="text" class="url-input" id="inp-script-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" oninput="onUrlChange()">
+      <input type="password" class="url-input" id="inp-secret-token" placeholder="Token rahasia" oninput="onTokenChange()">
       <button class="btn btn-primary" onclick="saveAndTestUrl()">Simpan & Test Koneksi</button>
       <button class="btn" onclick="dismissSetup()" id="btn-dismiss" style="display:none">Tutup</button>
     </div>
@@ -306,25 +307,44 @@ tbody td.num{text-align:right;font-family:var(--mono);font-size:12px}
 const STORE_KEY  = 'meta_shopee_tracker_v3';
 const URL_KEY    = 'meta_shopee_script_url';
 const SHEETS_KEY = 'meta_shopee_sheets_data';
+const TOKEN_KEY  = 'meta_shopee_secret_token';
 
 let entries      = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
 let sheetsData   = JSON.parse(localStorage.getItem(SHEETS_KEY) || '[]');
 let scriptUrl    = localStorage.getItem(URL_KEY) || '';
+let secretToken  = localStorage.getItem(TOKEN_KEY) || '';
 let activeRange  = '7days';
 let chart;
 
+function localISODate(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function makeRowId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'row_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+}
+
 // Init
-document.getElementById('inp-date').value = new Date().toISOString().slice(0,10);
-const today = new Date().toISOString().slice(0,10);
+document.getElementById('inp-date').value = localISODate();
+const today = localISODate();
 document.getElementById('range-end').value = today;
 const d7 = new Date(); d7.setDate(d7.getDate()-6);
-document.getElementById('range-start').value = d7.toISOString().slice(0,10);
+document.getElementById('range-start').value = localISODate(d7);
 
 if (scriptUrl) {
   document.getElementById('inp-script-url').value = scriptUrl;
-  updateSyncBadge('connected');
   document.getElementById('btn-dismiss').style.display = 'inline-flex';
   document.getElementById('histori-card').style.display = 'block';
+  if (secretToken) {
+    document.getElementById('inp-secret-token').value = secretToken;
+    updateSyncBadge('connected');
+  } else {
+    updateSyncBadge('error','Token belum diisi');
+  }
 }
 
 // ── HELPERS ──────────────────────────────────────────────────
@@ -402,14 +422,27 @@ function onUrlChange() {
   if (!val) updateSyncBadge('','Belum terhubung');
 }
 
+function onTokenChange() {
+  const val=document.getElementById('inp-secret-token').value.trim();
+  if (!val) updateSyncBadge('error','Token belum diisi');
+}
+
+function getSecretToken() {
+  return (secretToken || localStorage.getItem(TOKEN_KEY) || '').trim();
+}
+
 async function saveAndTestUrl() {
   const url=document.getElementById('inp-script-url').value.trim();
+  const token=document.getElementById('inp-secret-token').value.trim();
   if (!url.includes('script.google.com')){toast('⚠ URL tidak valid','error');return}
+  if (!token){toast('⚠ Isi token rahasia dulu','error');updateSyncBadge('error','Token belum diisi');return}
+  scriptUrl=url;
+  secretToken=token;
   updateSyncBadge('syncing','Menguji koneksi...');
   try {
-    await sendToSheets(url,{date:new Date().toISOString().slice(0,10),product:'TEST KONEKSI',spend:0,commission:0,clicks:0,note:'Test otomatis'});
-    scriptUrl=url;
+    await sendToSheets(url,{action:'test'});
     localStorage.setItem(URL_KEY,scriptUrl);
+    localStorage.setItem(TOKEN_KEY,secretToken);
     updateSyncBadge('connected');
     document.getElementById('btn-dismiss').style.display='inline-flex';
     document.getElementById('histori-card').style.display='block';
@@ -425,7 +458,10 @@ function dismissSetup() { document.getElementById('setup-banner').style.display=
 
 // ── SEND (POST) ───────────────────────────────────────────────
 async function sendToSheets(url, data) {
-  const res=await fetch(url,{method:'POST',body:JSON.stringify(data),headers:{'Content-Type':'text/plain'}});
+  const token = getSecretToken();
+  if (!token) throw new Error('Token belum diisi');
+  const payload = { ...data, token };
+  const res=await fetch(url,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain'}});
   const json=await res.json();
   if (json.status!=='ok') throw new Error(json.message||'Gagal');
   return json;
@@ -434,6 +470,8 @@ async function sendToSheets(url, data) {
 // ── LOAD (GET) FROM SHEETS ────────────────────────────────────
 async function loadFromSheets() {
   if (!scriptUrl) { toast('⚠ Belum terhubung ke Sheets','error'); return; }
+  const token = getSecretToken();
+  if (!token) { toast('⚠ Token belum diisi','error'); updateSyncBadge('error','Token belum diisi'); return; }
   const {start, end} = getDateRange();
   const btn=document.getElementById('btn-load');
   const status=document.getElementById('load-status');
@@ -442,7 +480,7 @@ async function loadFromSheets() {
   status.textContent='Mengambil data dari Google Sheets...';
   updateSyncBadge('syncing','Memuat histori...');
   try {
-    const url=`${scriptUrl}?startDate=${start}&endDate=${end}`;
+    const url=`${scriptUrl}?startDate=${start}&endDate=${end}&token=${encodeURIComponent(token)}`;
     const res=await fetch(url);
     const json=await res.json();
     if (json.status!=='ok') throw new Error(json.message||'Gagal fetch');
@@ -484,7 +522,8 @@ async function addEntry() {
   const note=document.getElementById('inp-note').value.trim();
   if (!date){toast('⚠ Pilih tanggal dulu','error');return}
   if (spend<=0&&commission<=0){toast('⚠ Isi minimal spend atau komisi','error');return}
-  const entry={id:Date.now(),date,product:product||'—',spend,commission,clicks,note,synced:false,source:'local'};
+  const rowId=makeRowId();
+  const entry={id:rowId,rowId,date,product:product||'—',spend,commission,clicks,note,synced:false,source:'local'};
   entries.push(entry);
   entries.sort((a,b)=>a.date.localeCompare(b.date));
   save();
@@ -495,7 +534,7 @@ async function addEntry() {
     btn.disabled=true; btn.textContent='↻ Menyimpan...';
     updateSyncBadge('syncing');
     try {
-      await sendToSheets(scriptUrl,{date,product:product||'—',spend,commission,clicks,note});
+      await sendToSheets(scriptUrl,{rowId,date,product:product||'—',spend,commission,clicks,note});
       entry.synced=true; save(); render();
       updateSyncBadge('connected');
       toast('✓ Data tersimpan ke Google Sheets','success');
@@ -519,7 +558,7 @@ async function retryUnsync() {
   let ok=0;
   for (const e of unsynced) {
     try {
-      await sendToSheets(scriptUrl,{date:e.date,product:e.product,spend:e.spend,commission:e.commission,clicks:e.clicks,note:e.note});
+      await sendToSheets(scriptUrl,{rowId:e.rowId||e.id,date:e.date,product:e.product,spend:e.spend,commission:e.commission,clicks:e.clicks,note:e.note});
       e.synced=true; ok++;
     } catch(_){}
   }
@@ -547,7 +586,7 @@ async function deleteEntry(entryData, source) {
 
   // Hapus dari sheetsData cache jika source=sheets
   if (source==='sheets') {
-    sheetsData=sheetsData.filter(e=>e.id!==entryData.id);
+    sheetsData=sheetsData.filter(e=>(e.rowId||e.id)!==(entryData.rowId||entryData.id));
     localStorage.setItem(SHEETS_KEY,JSON.stringify(sheetsData));
   }
 
@@ -557,18 +596,16 @@ async function deleteEntry(entryData, source) {
   if (scriptUrl) {
     updateSyncBadge('syncing','Menghapus dari Sheets...');
     try {
-      const res=await fetch(scriptUrl,{
-        method:'POST',
-        body:JSON.stringify({
-          action  : 'delete',
-          rowId   : entryData.rowId || '',
-          date    : entryData.date,
-          product : entryData.product,
-          spend   : entryData.spend
-        }),
-        headers:{'Content-Type':'text/plain'}
+      const json=await sendToSheets(scriptUrl,{
+        action  : 'delete',
+        rowId   : entryData.rowId || entryData.id || '',
+        date    : entryData.date,
+        product : entryData.product,
+        spend   : entryData.spend,
+        commission: entryData.commission || 0,
+        clicks  : entryData.clicks || 0,
+        note    : entryData.note || ''
       });
-      const json=await res.json();
       if (json.status==='ok' && json.deleted) {
         updateSyncBadge('connected');
         toast('✓ Data berhasil dihapus dari Sheets','success');
@@ -597,9 +634,9 @@ function save() { localStorage.setItem(STORE_KEY,JSON.stringify(entries)); }
 
 // ── GET COMBINED DATA ─────────────────────────────────────────
 function getCombinedData() {
-  // Gabungkan local + sheets, hindari duplikat (prefer local)
-  const localKeys=new Set(entries.map(e=>e.date+'|'+e.product));
-  const sheetsOnly=sheetsData.filter(e=>!localKeys.has(e.date+'|'+e.product));
+  // Gabungkan local + sheets, hindari duplikat berbasis rowId/id
+  const localIds=new Set(entries.map(e=>e.rowId||e.id));
+  const sheetsOnly=sheetsData.filter(e=>!localIds.has(e.rowId||e.id));
   const combined=[...entries,...sheetsOnly];
   combined.sort((a,b)=>a.date.localeCompare(b.date));
   return combined;
@@ -645,8 +682,9 @@ function renderMetrics(data) {
   const totalSpend=data.reduce((s,e)=>s+e.spend,0);
   const totalComm=data.reduce((s,e)=>s+e.commission,0);
   const profit=totalComm-totalSpend;
-  const roas=totalSpend>0?totalComm/totalSpend:0;
-  const days=data.length;
+  const ratio=totalSpend>0?totalComm/totalSpend:0;
+  const days=new Set(data.map(e=>e.date)).size;
+  const rowCount=data.length;
   const totalClicks=data.reduce((s,e)=>s+(e.clicks||0),0);
   const cpc=totalClicks>0?totalSpend/totalClicks:0;
   const sheetsCount=data.filter(e=>e.source==='sheets').length;
@@ -654,22 +692,23 @@ function renderMetrics(data) {
 
   let vClass,vIcon,vMsg;
   if (totalSpend===0){vClass='neutral';vIcon='→';vMsg='Tambah data spend iklan untuk melihat analisis.';}
-  else if (roas>=2.5){vClass='good';vIcon='▲';vMsg=`ROAS ${roas.toFixed(2)}x — iklan sangat profitable! Kamu untung ${fmtS(profit)} dari ${days} hari data.`;}
-  else if (roas>=1.5){vClass='good';vIcon='✓';vMsg=`ROAS ${roas.toFixed(2)}x — profitable. Untung ${fmtS(profit)} selama ${days} hari.`;}
-  else if (roas>=1.0){vClass='warn';vIcon='~';vMsg=`ROAS ${roas.toFixed(2)}x — hampir impas. Selisih ${fmtS(profit)}. Optimasi creative atau ganti produk.`;}
-  else{vClass='bad';vIcon='▼';vMsg=`ROAS ${roas.toFixed(2)}x — iklan boncos ${fmtS(Math.abs(profit))}. Evaluasi produk dan targeting.`;}
+  else if (ratio>=2.5){vClass='good';vIcon='▲';vMsg=`K/S Ratio ${ratio.toFixed(2)}x — iklan sangat profitable! Kamu untung ${fmtS(profit)} dari ${days} hari data.`;}
+  else if (ratio>=1.5){vClass='good';vIcon='✓';vMsg=`K/S Ratio ${ratio.toFixed(2)}x — profitable. Untung ${fmtS(profit)} selama ${days} hari.`;}
+  else if (ratio>=1.0){vClass='warn';vIcon='~';vMsg=`K/S Ratio ${ratio.toFixed(2)}x — hampir impas. Selisih ${fmtS(profit)}. Optimasi creative atau ganti produk.`;}
+  else{vClass='bad';vIcon='▼';vMsg=`K/S Ratio ${ratio.toFixed(2)}x — iklan boncos ${fmtS(Math.abs(profit))}. Evaluasi produk dan targeting.`;}
 
   document.getElementById('verdict-area').innerHTML=`<div class="verdict-bar ${vClass}"><span class="verdict-icon">${vIcon}</span><span>${vMsg}</span></div>`;
 
-  const rC=roas>=2?'green':roas>=1?'amber':'red';
+  const rC=ratio>=2?'green':ratio>=1?'amber':'red';
   const pC=profit>=0?'green':'red';
   const pCard=profit>0?'good':profit<0?'bad':'';
+  const roi=totalSpend>0?(profit/totalSpend)*100:0;
 
   document.getElementById('metrics-row').innerHTML=`
     <div class="metric-card info">
       <div class="metric-label">Total Spend</div>
       <div class="metric-val blue">${fmtS(totalSpend)}</div>
-      <div class="metric-sub">${days} hari data</div>
+      <div class="metric-sub">${days} hari · ${rowCount} baris</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">Total Komisi</div>
@@ -679,12 +718,12 @@ function renderMetrics(data) {
     <div class="metric-card ${pCard}">
       <div class="metric-label">Profit / Rugi</div>
       <div class="metric-val ${pC}">${profit>=0?'+':''}${fmtS(profit)}</div>
-      <div class="metric-sub">${profit>=0?'Untung':'Boncos'} kumulatif</div>
+      <div class="metric-sub">ROI: ${totalSpend>0?roi.toFixed(1)+'%':'—'}</div>
     </div>
     <div class="metric-card">
-      <div class="metric-label">ROAS</div>
-      <div class="metric-val ${rC}">${totalSpend>0?roas.toFixed(2)+'x':'—'}</div>
-      <div class="metric-sub">${roas>=2?'Siap scale':roas>=1?'Perlu optimasi':'Stop & evaluasi'}</div>
+      <div class="metric-label">K/S Ratio</div>
+      <div class="metric-val ${rC}">${totalSpend>0?ratio.toFixed(2)+'x':'—'}</div>
+      <div class="metric-sub">${ratio>=2?'Siap scale':ratio>=1?'Perlu optimasi':'Stop & evaluasi'}</div>
     </div>
     ${totalClicks>0?`<div class="metric-card"><div class="metric-label">Total Klik</div><div class="metric-val">${totalClicks.toLocaleString('id-ID')}</div><div class="metric-sub">CPC: ${fmt(cpc)}</div></div>`:''}
     <div class="metric-card">
@@ -703,8 +742,8 @@ function renderTable(data) {
   }
   const rows=[...data].reverse().map(e=>{
     const profit=e.commission-e.spend;
-    const roas=e.spend>0?e.commission/e.spend:null;
-    const rC=roas===null?'':roas>=2?'great':roas>=1?'ok':'bad';
+    const ratio=e.spend>0?e.commission/e.spend:null;
+    const rC=ratio===null?'':ratio>=2?'great':ratio>=1?'ok':'bad';
     const pC=profit>=0?'pos':'neg';
     const prod=e.product!=='—'?`<span class="product-badge">${e.product}</span>`:`<span style="color:var(--muted);font-size:12px">—</span>`;
     const srcBadge=e.source==='sheets'
@@ -716,7 +755,8 @@ function renderTable(data) {
     // Semua baris bisa dihapus — lokal maupun dari Sheets
     const entryJson=JSON.stringify({
       id:e.id, rowId:e.rowId||'', date:e.date,
-      product:e.product, spend:e.spend, source:e.source||'local'
+      product:e.product, spend:e.spend, commission:e.commission,
+      clicks:e.clicks||0, note:e.note||'', source:e.source||'local'
     }).replace(/'/g,"&#39;");
     const src=e.source||'local';
     const deleteBtnLabel=src==='sheets'?'✕ Sheets':'✕';
@@ -729,7 +769,7 @@ function renderTable(data) {
       <td class="num">${fmt(e.spend)}</td>
       <td class="num">${fmt(e.commission)}</td>
       <td class="profit-cell ${pC}">${profit>=0?'+':''}${fmt(profit)}</td>
-      <td class="roas-cell ${rC}">${roas!==null?roas.toFixed(2)+'x':'—'}</td>
+      <td class="roas-cell ${rC}">${ratio!==null?ratio.toFixed(2)+'x':'—'}</td>
       <td class="num">${e.clicks>0?e.clicks.toLocaleString('id-ID'):'—'}</td>
       <td class="sync-cell">${scriptUrl?syncIcon:'—'}</td>
       <td style="text-align:center">${deleteBtn}</td>
@@ -740,7 +780,7 @@ function renderTable(data) {
     <thead><tr>
       <th>Tanggal</th><th>Produk</th>
       <th class="num">Spend (Rp)</th><th class="num">Komisi (Rp)</th>
-      <th class="num">Profit/Rugi</th><th class="num">ROAS</th>
+      <th class="num">Profit/Rugi</th><th class="num">K/S Ratio</th>
       <th class="num">Klik</th><th style="text-align:center">Sheets</th>
       <th style="text-align:center">Hapus</th>
     </tr></thead>
@@ -795,11 +835,11 @@ function renderChart(data) {
 function exportCSV() {
   const data=getCombinedData();
   if (!data.length){toast('⚠ Tidak ada data','error');return}
-  const header=['Tanggal','Produk','Spend Rp','Komisi Rp','Profit/Rugi Rp','ROAS','Klik','Catatan','Sumber'];
+  const header=['Tanggal','Produk','Spend Rp','Komisi Rp','Profit/Rugi Rp','K/S Ratio','Klik','Catatan','Sumber'];
   const rows=data.map(e=>{
     const profit=e.commission-e.spend;
-    const roas=e.spend>0?(e.commission/e.spend).toFixed(2):'—';
-    return [e.date,e.product,e.spend,e.commission,profit,roas,e.clicks||0,e.note||'',e.source||'lokal'].join(',');
+    const ratio=e.spend>0?(e.commission/e.spend).toFixed(2):'—';
+    return [e.date,e.product,e.spend,e.commission,profit,ratio,e.clicks||0,e.note||'',e.source||'lokal'].join(',');
   });
   const blob=new Blob([[header.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8;'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
@@ -808,7 +848,7 @@ function exportCSV() {
 }
 
 document.addEventListener('keydown',e=>{
-  if (e.key==='Enter'&&e.target.id.startsWith('inp-')&&e.target.id!=='inp-script-url') addEntry();
+  if (e.key==='Enter'&&e.target.id.startsWith('inp-')&&e.target.id!=='inp-script-url'&&e.target.id!=='inp-secret-token') addEntry();
 });
 
 render();
