@@ -535,14 +535,61 @@ function renderUnsyncBanner() {
   else banner.style.display='none';
 }
 
-function deleteEntry(id) {
-  entries=entries.filter(e=>e.id!==id);
-  save(); render(); toast('Data lokal dihapus (tidak terhapus dari Sheets)','info');
+async function deleteEntry(entryData, source) {
+  const label = source==='sheets' ? 'data Sheets' : 'data lokal';
+  if (!confirm(`Hapus ${label} ini?\nTanggal: ${entryData.date} | Produk: ${entryData.product}\n\n${source==='sheets'?'Data akan terhapus dari Google Sheets.':'Data akan terhapus dari lokal dan Google Sheets.'}`)) return;
+
+  // Hapus dari local storage (jika ada)
+  if (source!=='sheets') {
+    entries=entries.filter(e=>e.id!==entryData.id);
+    save();
+  }
+
+  // Hapus dari sheetsData cache jika source=sheets
+  if (source==='sheets') {
+    sheetsData=sheetsData.filter(e=>e.id!==entryData.id);
+    localStorage.setItem(SHEETS_KEY,JSON.stringify(sheetsData));
+  }
+
+  render();
+
+  // Sync delete ke Google Sheets
+  if (scriptUrl) {
+    updateSyncBadge('syncing','Menghapus dari Sheets...');
+    try {
+      const res=await fetch(scriptUrl,{
+        method:'POST',
+        body:JSON.stringify({
+          action  : 'delete',
+          rowId   : entryData.rowId || '',
+          date    : entryData.date,
+          product : entryData.product,
+          spend   : entryData.spend
+        }),
+        headers:{'Content-Type':'text/plain'}
+      });
+      const json=await res.json();
+      if (json.status==='ok' && json.deleted) {
+        updateSyncBadge('connected');
+        toast('✓ Data berhasil dihapus dari Sheets','success');
+      } else if (json.status==='ok' && !json.deleted) {
+        updateSyncBadge('connected');
+        toast('⚠ Dihapus lokal, tapi baris tidak ditemukan di Sheets','info',3500);
+      } else {
+        throw new Error(json.message||'Gagal');
+      }
+    } catch(err) {
+      updateSyncBadge('error','Gagal hapus di Sheets');
+      toast('⚠ Dihapus lokal tapi gagal hapus di Sheets: '+err.message,'error',4000);
+    }
+  } else {
+    toast('✓ Data dihapus (belum terhubung ke Sheets)','info');
+  }
 }
 
 function confirmReset() {
-  if (confirm('Reset semua data lokal? Data di Google Sheets tidak ikut terhapus.')){
-    entries=[]; sheetsData=[]; save(); localStorage.removeItem(SHEETS_KEY); render(); toast('Data lokal direset','info');
+  if (confirm('Reset semua data lokal dan cache Sheets?\nData di Google Sheets TIDAK ikut terhapus.')) {
+    entries=[]; sheetsData=[]; save(); localStorage.removeItem(SHEETS_KEY); render(); toast('Data lokal & cache direset','info');
   }
 }
 
@@ -666,7 +713,15 @@ function renderTable(data) {
     const syncIcon=e.source==='sheets'
       ?`<span class="synced-icon" title="Dari Google Sheets">☁</span>`
       :(e.synced?`<span class="synced-icon" title="Tersimpan di Sheets">✓</span>`:`<span class="unsynced-icon" title="Belum sync" onclick="retryUnsync()">⏳</span>`);
-    const deleteBtn=e.source==='sheets'?'':`<button class="btn btn-sm btn-danger" onclick="deleteEntry(${e.id})">✕</button>`;
+    // Semua baris bisa dihapus — lokal maupun dari Sheets
+    const entryJson=JSON.stringify({
+      id:e.id, rowId:e.rowId||'', date:e.date,
+      product:e.product, spend:e.spend, source:e.source||'local'
+    }).replace(/'/g,"&#39;");
+    const src=e.source||'local';
+    const deleteBtnLabel=src==='sheets'?'✕ Sheets':'✕';
+    const deleteBtnStyle=src==='sheets'?'color:#1a4f8a;border-color:#a8c0e8':'';
+    const deleteBtn=`<button class="btn btn-sm btn-danger" style="${deleteBtnStyle}" onclick="deleteEntry(JSON.parse(this.dataset.entry),this.dataset.source)" data-entry='${entryJson}' data-source="${src}" title="${src==='sheets'?'Hapus dari Sheets':'Hapus lokal & Sheets'}">${deleteBtnLabel}</button>`;
     const inputTime=e.inputTime?`<br><span style="font-size:10px;color:var(--muted)">${e.inputTime}</span>`:'';
     return `<tr>
       <td>${fmtDate(e.date)}${inputTime}</td>
