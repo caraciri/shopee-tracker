@@ -1,66 +1,526 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tracker Iklan — Meta Ads × Shopee Affiliate</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f5f4f0;--surface:#fff;--surface2:#f0efe9;--border:#e2e0d8;--border2:#ccc9be;--text:#1a1a18;--muted:#7a7870;--mono:'JetBrains Mono',monospace;--sans:'Plus Jakarta Sans',sans-serif;--green:#1a7a52;--green-bg:#e8f5ee;--red:#b83232;--red-bg:#faebeb;--amber:#8a5c00;--amber-bg:#fef3d8;--blue:#1a4f8a;--blue-bg:#e8f0fb;--accent:#2d5be3;}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
-.logo{font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:-.5px}.logo span{color:var(--accent)}.topbar-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.sync-badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);transition:all .3s}.sync-badge.connected{border-color:#a8d9be;background:var(--green-bg);color:var(--green)}.sync-badge.error{border-color:#e8b0b0;background:var(--red-bg);color:var(--red)}.sync-badge.syncing{border-color:#a8c0e8;background:var(--blue-bg);color:var(--blue)}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:currentColor}.sync-dot.pulse{animation:pulse 1.2s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.btn{font-family:var(--sans);font-size:13px;font-weight:500;padding:8px 16px;border-radius:8px;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--muted);transition:all .15s}.btn:hover{background:var(--surface2);color:var(--text)}.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-primary:hover{background:#2450c8;color:#fff}.btn-success{background:var(--green);color:#fff;border-color:var(--green)}.btn-success:hover{background:#155f3f;color:#fff}.btn-danger{color:var(--red);border-color:#e8c0c0}.btn-danger:hover{background:var(--red-bg)}.btn-sm{padding:5px 11px;font-size:12px;border-radius:6px}.btn:disabled{opacity:.5;cursor:not-allowed}
-.container{max-width:1200px;margin:0 auto;padding:24px 24px 60px}.setup-banner{background:#fffbea;border:1px solid #e8d090;border-radius:12px;padding:16px 20px;margin-bottom:20px}.setup-banner h3{font-size:14px;font-weight:600;color:var(--amber);margin-bottom:10px}.setup-steps{font-size:12px;color:#6a4800;line-height:1.8}.setup-steps ol{padding-left:18px}.setup-steps code{background:#fde8a0;padding:1px 6px;border-radius:4px;font-family:var(--mono);font-size:11px;color:#5a3800}.setup-steps a{color:var(--accent);font-weight:600}.url-row{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap}.url-input{flex:1;min-width:240px;background:#fff;border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none}.url-input:focus{border-color:var(--accent)}
-.input-card,.histori-card,.chart-card,.table-card,.rank-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:20px}.input-card,.histori-card,.chart-card,.rank-card{padding:22px 24px}.table-card{overflow:hidden}.card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}.card-title::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px}.input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;align-items:end}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}.field-hint{font-size:10px;color:var(--muted);opacity:.7;margin-top:-3px}.input-wrap{display:flex;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .15s}.input-wrap:focus-within{border-color:var(--accent);background:#fff}.input-pre,.input-suf{padding:0 9px;font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--surface2);border-right:1px solid var(--border);height:38px;display:flex;align-items:center;white-space:nowrap;flex-shrink:0}.input-suf{border-right:none;border-left:1px solid var(--border)}
-input[type="text"],input[type="number"],input[type="date"]{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:13px;padding:0 10px;height:38px;min-width:0}input[type="number"]::-webkit-inner-spin-button{display:none}input[type="text"]{font-family:var(--sans)}
-.range-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}.range-tab{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--muted);transition:all .15s}.range-tab:hover{border-color:var(--border2);color:var(--text)}.range-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}.custom-range{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.custom-range.show{display:flex}.custom-range span{font-size:12px;color:var(--muted)}.load-status{font-size:12px;color:var(--muted);margin-top:8px;min-height:18px}.load-status.loading{color:var(--blue)}.load-status.success{color:var(--green)}.load-status.error{color:var(--red)}
-.metrics-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:20px}.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}.metric-card.good{border-color:#a8d9be;background:var(--green-bg)}.metric-card.bad{border-color:#e8b0b0;background:var(--red-bg)}.metric-card.warn{border-color:#e8d090;background:var(--amber-bg)}.metric-card.info{border-color:#a8c0e8;background:var(--blue-bg)}.metric-label{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.metric-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text);line-height:1.1}.metric-val.green{color:var(--green)}.metric-val.red{color:var(--red)}.metric-val.amber{color:var(--amber)}.metric-val.blue{color:var(--blue)}.metric-sub{font-size:11px;color:var(--muted);margin-top:4px}.verdict-bar{border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;line-height:1.6;display:flex;align-items:flex-start;gap:12px}.verdict-bar.good{background:var(--green-bg);border:1px solid #a8d9be;color:var(--green)}.verdict-bar.bad{background:var(--red-bg);border:1px solid #e8b0b0;color:var(--red)}.verdict-bar.warn{background:var(--amber-bg);border:1px solid #e8d090;color:var(--amber)}.verdict-bar.neutral{background:var(--surface2);border:1px solid var(--border);color:var(--muted)}.verdict-icon{font-family:var(--mono);font-size:18px;line-height:1;flex-shrink:0;margin-top:1px}.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}.legend-row{display:flex;gap:16px;flex-wrap:wrap}.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-.table-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}table{width:100%;border-collapse:collapse}thead th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);white-space:nowrap}thead th.num{text-align:right}tbody tr{transition:background .1s}tbody tr:hover{background:var(--surface2)}tbody tr:not(:last-child) td{border-bottom:1px solid var(--border)}tbody td{padding:10px 14px;font-size:13px;vertical-align:middle}tbody td.num{text-align:right;font-family:var(--mono);font-size:12px}.profit-cell{font-family:var(--mono);font-size:12px;text-align:right;font-weight:600}.profit-cell.pos{color:var(--green)}.profit-cell.neg{color:var(--red)}.roas-cell{font-family:var(--mono);font-size:12px;text-align:right;font-weight:700}.roas-cell.great{color:var(--green)}.roas-cell.ok{color:var(--amber)}.roas-cell.bad{color:var(--red)}.product-badge,.tag-badge{display:inline-block;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.product-badge{background:var(--blue-bg);color:var(--blue)}.tag-badge{background:var(--surface2);color:var(--muted)}.decision-badge{display:inline-block;border-radius:999px;padding:3px 9px;font-family:var(--mono);font-size:10px;font-weight:700}.decision-scale{background:var(--green-bg);color:var(--green)}.decision-hold{background:var(--amber-bg);color:var(--amber)}.decision-watch{background:var(--blue-bg);color:var(--blue)}.decision-kill{background:var(--red-bg);color:var(--red)}.source-badge{font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px}.source-sheets{background:#e8f0fb;color:#1a4f8a}.source-local{background:var(--surface2);color:var(--muted)}.sync-cell{text-align:center}.synced-icon{color:var(--green);font-size:13px}.unsynced-icon{color:var(--amber);font-size:13px;cursor:pointer}.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}.empty-state .ei{font-family:var(--mono);font-size:28px;margin-bottom:12px;opacity:.3}.unsync-banner{background:var(--amber-bg);border:1px solid #e8d090;border-radius:10px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--amber);flex-wrap:wrap}.toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;transform:translateY(60px);opacity:0;transition:all .3s;z-index:999}.toast.show{transform:translateY(0);opacity:1}.toast.success{background:#1a7a52;color:#fff}.toast.error{background:#b83232;color:#fff}.toast.info{background:#1a1a18;color:#fff}
-@media(max-width:600px){.topbar{padding:12px 16px}.container{padding:16px 12px 48px}.input-grid{grid-template-columns:1fr}.metrics-row{grid-template-columns:1fr 1fr}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracker Iklan — Meta Ads × Shopee Affiliate</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#f5f4f0;--surface:#fff;--surface2:#f0efe9;--border:#e2e0d8;--border2:#ccc9be;--text:#1a1a18;--muted:#7a7870;--green:#1a7a52;--green-bg:#e8f5ee;--red:#b83232;--red-bg:#faebeb;--amber:#8a5c00;--amber-bg:#fef3d8;--blue:#1a4f8a;--blue-bg:#e8f0fb;--accent:#2d5be3;--mono:'JetBrains Mono',monospace;--sans:'Plus Jakarta Sans',sans-serif}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+    .logo{font-family:var(--mono);font-weight:700}.logo span{color:var(--accent)}.topbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .sync-badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted)}
+    .sync-badge.connected{border-color:#a8d9be;background:var(--green-bg);color:var(--green)}.sync-badge.error{border-color:#e8b0b0;background:var(--red-bg);color:var(--red)}.sync-badge.syncing{border-color:#a8c0e8;background:var(--blue-bg);color:var(--blue)}
+    .sync-dot{width:7px;height:7px;border-radius:50%;background:currentColor}.sync-dot.pulse{animation:pulse 1.2s infinite}@keyframes pulse{50%{opacity:.3}}
+    .btn{font-family:var(--sans);font-size:13px;font-weight:500;padding:8px 16px;border-radius:8px;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--muted)}.btn:hover{background:var(--surface2);color:var(--text)}.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn-primary:hover{background:#2450c8;color:#fff}.btn-success{background:var(--green);border-color:var(--green);color:#fff}.btn-danger{color:var(--red);border-color:#e8c0c0}.btn-sm{padding:5px 11px;font-size:12px}.btn:disabled{opacity:.5;cursor:not-allowed}
+    .container{max-width:1200px;margin:0 auto;padding:24px 24px 60px}.card,.setup-banner,.table-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:20px}.card,.setup-banner{padding:22px 24px}.table-card{overflow:hidden}.setup-banner{background:#fffbea;border-color:#e8d090}.setup-banner h3{font-size:14px;color:var(--amber);margin-bottom:10px}.setup-steps{font-size:12px;color:#6a4800;line-height:1.8}.setup-steps ol{padding-left:18px}.setup-steps code{background:#fde8a0;padding:1px 6px;border-radius:4px;font-family:var(--mono);font-size:11px}
+    .card-title{font-size:13px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}.card-title:before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px}.url-row{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap}.url-input{flex:1;min-width:240px;background:#fff;border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-family:var(--mono);font-size:12px;outline:none}
+    .input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;align-items:end}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}.field-hint{font-size:10px;color:var(--muted);opacity:.8}.input-wrap{display:flex;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden}.input-wrap:focus-within{border-color:var(--accent);background:#fff}.input-pre,.input-suf{padding:0 9px;font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--surface2);border-right:1px solid var(--border);height:38px;display:flex;align-items:center}.input-suf{border-right:0;border-left:1px solid var(--border)}
+    input,select{font-family:var(--sans)}input[type=text],input[type=password],input[type=number],input[type=date]{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-size:13px;padding:0 10px;height:38px;min-width:0}input[type=number]::-webkit-inner-spin-button{display:none}
+    .range-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}.range-tab{padding:6px 14px;border-radius:8px;font-size:12px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer}.range-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}.custom-range{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.custom-range.show{display:flex}.load-status{font-size:12px;margin-top:8px;min-height:18px;color:var(--muted)}.load-status.loading{color:var(--blue)}.load-status.success{color:var(--green)}.load-status.error{color:var(--red)}
+    .metrics-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:20px}.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}.metric-card.good{border-color:#a8d9be;background:var(--green-bg)}.metric-card.bad{border-color:#e8b0b0;background:var(--red-bg)}.metric-card.warn{border-color:#e8d090;background:var(--amber-bg)}.metric-card.info{border-color:#a8c0e8;background:var(--blue-bg)}.metric-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.metric-val{font-family:var(--mono);font-size:22px;font-weight:700}.green{color:var(--green)}.red{color:var(--red)}.amber{color:var(--amber)}.blue{color:var(--blue)}.metric-sub{font-size:11px;color:var(--muted);margin-top:4px}.verdict-bar{border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;line-height:1.6}.verdict-bar.good{background:var(--green-bg);border:1px solid #a8d9be;color:var(--green)}.verdict-bar.bad{background:var(--red-bg);border:1px solid #e8b0b0;color:var(--red)}.verdict-bar.warn{background:var(--amber-bg);border:1px solid #e8d090;color:var(--amber)}.verdict-bar.neutral{background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+    .table-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}table{width:100%;border-collapse:collapse}th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:1px solid var(--border);white-space:nowrap}th.num,td.num{text-align:right}td{padding:10px 14px;font-size:13px;vertical-align:middle}tr:not(:last-child) td{border-bottom:1px solid var(--border)}.profit-cell,.ratio-cell{font-family:var(--mono);font-size:12px;text-align:right;font-weight:700}.pos{color:var(--green)}.neg{color:var(--red)}.great{color:var(--green)}.ok{color:var(--amber)}.bad{color:var(--red)}.badge{display:inline-block;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.product-badge{background:var(--blue-bg);color:var(--blue)}.tag-badge{background:var(--surface2);color:var(--muted)}.source-badge{font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px}.source-sheets{background:#e8f0fb;color:#1a4f8a}.source-local{background:var(--surface2);color:var(--muted)}.decision-badge{display:inline-block;border-radius:999px;padding:3px 9px;font-family:var(--mono);font-size:10px;font-weight:700}.decision-scale{background:var(--green-bg);color:var(--green)}.decision-hold{background:var(--amber-bg);color:var(--amber)}.decision-watch{background:var(--blue-bg);color:var(--blue)}.decision-kill{background:var(--red-bg);color:var(--red)}
+    .empty-state{text-align:center;padding:48px 20px;color:var(--muted)}.empty-state .ei{font-family:var(--mono);font-size:28px;margin-bottom:12px;opacity:.3}.unsync-banner{background:var(--amber-bg);border:1px solid #e8d090;border-radius:10px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--amber);flex-wrap:wrap}.toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;transform:translateY(60px);opacity:0;transition:all .3s;z-index:999}.toast.show{transform:translateY(0);opacity:1}.toast.success{background:#1a7a52;color:#fff}.toast.error{background:#b83232;color:#fff}.toast.info{background:#1a1a18;color:#fff}
+    @media(max-width:600px){.topbar{padding:12px 16px}.container{padding:16px 12px 48px}.input-grid{grid-template-columns:1fr}.metrics-row{grid-template-columns:1fr 1fr}}
+  </style>
 </head>
 <body>
-<div class="topbar"><div><div class="logo">META<span>×</span>SHOPEE <span style="font-weight:400;color:var(--muted);font-size:12px;">TRACKER</span></div></div><div class="topbar-right"><div class="sync-badge" id="sync-badge"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Belum terhubung</span></div><button class="btn btn-sm" onclick="exportCSV()">↓ CSV</button><button class="btn btn-sm btn-danger" onclick="confirmReset()">✕ Reset</button></div></div>
-<div class="container">
-<div class="setup-banner" id="setup-banner"><h3>⚙ Setup — Hubungkan ke Google Sheets</h3><div class="setup-steps"><ol><li>Buka <a href="https://sheets.new" target="_blank">sheets.new</a> → buat spreadsheet baru</li><li>Klik <code>Extensions</code> → <code>Apps Script</code> → paste isi file <code>apps-script.gs</code></li><li>Klik <code>Deploy</code> → <code>New Deployment</code> → type: <code>Web App</code></li><li>Set <code>Execute as: Me</code> | <code>Who has access: Anyone</code> → Deploy</li><li>Copy URL Web App + isi token rahasia → klik <b>Simpan & Test</b></li></ol></div><div class="url-row"><input type="text" class="url-input" id="inp-script-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" oninput="onUrlChange()"><input type="password" class="url-input" id="inp-secret-token" placeholder="Token rahasia" oninput="onTokenChange()"><button class="btn btn-primary" onclick="saveAndTestUrl()">Simpan & Test Koneksi</button><button class="btn" onclick="dismissSetup()" id="btn-dismiss" style="display:none">Tutup</button></div></div>
-<div class="input-card"><div class="card-title">Input data campaign/adset/creative</div><div class="input-grid"><div class="field"><label>Tanggal Iklan</label><div class="input-wrap"><input type="date" id="inp-date"></div></div><div class="field"><label>Campaign</label><div class="input-wrap"><input type="text" id="inp-campaign" placeholder="CBO Produk Rumah"></div></div><div class="field"><label>Adset</label><div class="input-wrap"><input type="text" id="inp-adset" placeholder="Broad F 25+"></div></div><div class="field"><label>Creative</label><div class="input-wrap"><input type="text" id="inp-creative" placeholder="Video POV 01"></div></div><div class="field"><label>Hook / Angle</label><div class="input-wrap"><input type="text" id="inp-hook" placeholder="jalan santai di rumah"></div></div><div class="field"><label>Nama Produk</label><div class="input-wrap"><input type="text" id="inp-product" placeholder="misal: Treadmill Pink"></div></div><div class="field"><label>Link Affiliate</label><div class="input-wrap"><input type="text" id="inp-link" placeholder="https://shope.ee/..."></div></div><div class="field"><label>Spend Meta Ads</label><div class="input-wrap"><div class="input-pre">Rp</div><input type="number" id="inp-spend" placeholder="0" min="0"></div></div><div class="field"><label>Komisi D0</label><div class="input-wrap"><div class="input-pre">Rp</div><input type="number" id="inp-commission-d0" placeholder="0" min="0"></div><div class="field-hint">Hari iklan berjalan</div></div><div class="field"><label>Komisi D1</label><div class="input-wrap"><div class="input-pre">Rp</div><input type="number" id="inp-commission-d1" placeholder="0" min="0"></div></div><div class="field"><label>Komisi D3</label><div class="input-wrap"><div class="input-pre">Rp</div><input type="number" id="inp-commission-d3" placeholder="0" min="0"></div></div><div class="field"><label>Komisi D7</label><div class="input-wrap"><div class="input-pre">Rp</div><input type="number" id="inp-commission-d7" placeholder="0" min="0"></div></div><div class="field"><label>Klik</label><div class="input-wrap"><input type="number" id="inp-clicks" placeholder="0" min="0"><div class="input-suf">klik</div></div></div><div class="field"><label>Catatan</label><div class="input-wrap"><input type="text" id="inp-note" placeholder="misal: ganti creative"></div></div><div class="field" style="align-self:end"><button class="btn btn-primary" id="btn-add" onclick="addEntry()" style="height:38px;width:100%">+ Tambah & Sync</button></div></div></div>
-<div class="histori-card" id="histori-card" style="display:none"><div class="card-title">Muat histori dari Google Sheets</div><div class="range-tabs"><button class="range-tab" onclick="setRange('today',this)">Hari Ini</button><button class="range-tab" onclick="setRange('yesterday',this)">Kemarin</button><button class="range-tab active" onclick="setRange('7days',this)">7 Hari</button><button class="range-tab" onclick="setRange('30days',this)">30 Hari</button><button class="range-tab" onclick="setRange('thismonth',this)">Bulan Ini</button><button class="range-tab" onclick="setRange('custom',this)">Custom</button></div><div class="custom-range" id="custom-range"><span>Dari</span><div class="input-wrap" style="width:auto"><input type="date" id="range-start" style="width:140px"></div><span>sampai</span><div class="input-wrap" style="width:auto"><input type="date" id="range-end" style="width:140px"></div></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn btn-success" id="btn-load" onclick="loadFromSheets()" style="display:flex;align-items:center;gap:6px">↓ Muat Data dari Sheets</button><button class="btn btn-sm" onclick="clearSheetsData()">✕ Hapus data Sheets</button><div class="load-status" id="load-status"></div></div></div>
-<div id="unsync-banner" style="display:none" class="unsync-banner"><span>⚠ Ada <span id="unsync-count">0</span> data yang belum tersync ke Google Sheets.</span><button class="btn btn-sm" onclick="retryUnsync()">↺ Sync Ulang</button></div>
-<div id="summary-section" style="display:none"><div id="verdict-area"></div><div class="metrics-row" id="metrics-row"></div><div class="rank-card" id="rank-section"></div><div class="chart-card"><div class="chart-header"><div class="card-title" style="margin:0">Grafik kumulatif 7 hari</div><div class="legend-row"><div class="legend-item"><div class="legend-dot" style="background:#2d5be3"></div>Spend</div><div class="legend-item"><div class="legend-dot" style="background:#1a7a52"></div>Total Komisi D0-D7</div><div class="legend-item"><div class="legend-dot" style="background:#b83232;height:3px;border-radius:1px"></div>Profit/Rugi</div></div></div><div style="position:relative;height:220px"><canvas id="mainChart" role="img" aria-label="Grafik kumulatif spend dan komisi"></canvas></div></div></div>
-<div class="table-card"><div class="table-header"><div class="card-title" style="margin:0">Riwayat data</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><select id="filter-product" onchange="render()" style="font-family:var(--sans);font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);outline:none;cursor:pointer"><option value="">Semua produk</option></select><select id="filter-campaign" onchange="render()" style="font-family:var(--sans);font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);outline:none;cursor:pointer"><option value="">Semua campaign</option></select><select id="filter-source" onchange="render()" style="font-family:var(--sans);font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);outline:none;cursor:pointer"><option value="">Semua sumber</option><option value="local">Lokal saja</option><option value="sheets">Sheets saja</option></select></div></div><div id="table-wrap"><div class="empty-state"><div class="ei">[ ]</div><p>Belum ada data. Tambahkan data di atas atau muat dari Sheets.</p></div></div></div>
-</div><div class="toast" id="toast"></div>
+  <div class="topbar">
+    <div class="logo">META<span>×</span>SHOPEE <span style="font-weight:400;color:var(--muted);font-size:12px;">TRACKER v1.3</span></div>
+    <div class="topbar-right">
+      <div class="sync-badge" id="sync-badge"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Belum terhubung</span></div>
+      <button class="btn btn-sm" id="btn-export">↓ CSV</button>
+      <button class="btn btn-sm btn-danger" id="btn-reset">✕ Reset</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="setup-banner" id="setup-banner">
+      <h3>⚙ Setup — Hubungkan ke Google Sheets</h3>
+      <div class="setup-steps">
+        <ol>
+          <li>Buka <a href="https://sheets.new" target="_blank">sheets.new</a> → buat spreadsheet baru</li>
+          <li>Klik <code>Extensions</code> → <code>Apps Script</code> → paste isi file <code>apps-script.gs</code></li>
+          <li>Deploy sebagai <code>Web App</code>. Set <code>Execute as: Me</code> dan <code>Who has access: Anyone</code></li>
+          <li>Paste URL Web App dan token rahasia di bawah ini.</li>
+        </ol>
+      </div>
+      <div class="url-row">
+        <input type="text" class="url-input" id="inp-script-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
+        <input type="password" class="url-input" id="inp-secret-token" placeholder="Token rahasia">
+        <button class="btn btn-primary" id="btn-test">Simpan & Test Koneksi</button>
+        <button class="btn" id="btn-dismiss" style="display:none">Tutup</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Input data campaign/adset/creative</div>
+      <div class="input-grid">
+        <div class="field"><label>Tanggal Iklan</label><div class="input-wrap"><input type="date" id="inp-date"></div></div>
+        <div class="field"><label>Campaign</label><div class="input-wrap"><input type="text" id="inp-campaign" placeholder="CBO Produk Rumah"></div></div>
+        <div class="field"><label>Adset</label><div class="input-wrap"><input type="text" id="inp-adset" placeholder="Broad F 25+"></div></div>
+        <div class="field"><label>Creative</label><div class="input-wrap"><input type="text" id="inp-creative" placeholder="Video POV 01"></div></div>
+        <div class="field"><label>Hook / Angle</label><div class="input-wrap"><input type="text" id="inp-hook" placeholder="jalan santai di rumah"></div></div>
+        <div class="field"><label>Nama Produk</label><div class="input-wrap"><input type="text" id="inp-product" placeholder="Treadmill Pink"></div></div>
+        <div class="field"><label>Link Affiliate</label><div class="input-wrap"><input type="text" id="inp-link" placeholder="https://shope.ee/..."></div></div>
+        <div class="field"><label>Spend Meta Ads</label><div class="input-wrap"><div class="input-pre">Rp</div><input type="number" id="inp-spend" min="0" placeholder="0"></div></div>
+        <div class="field"><label>Komisi D0</label><div class="input-wrap"><div class="input-pre">Rp</div><input type="number" id="inp-commission-d0" min="0" placeholder="0"></div><div class="field-hint">Hari iklan berjalan</div></div>
+        <div class="field"><label>Komisi D1</label><div class="input-wrap"><div class="input-pre">Rp</div><input type="number" id="inp-commission-d1" min="0" placeholder="0"></div></div>
+        <div class="field"><label>Komisi D3</label><div class="input-wrap"><div class="input-pre">Rp</div><input type="number" id="inp-commission-d3" min="0" placeholder="0"></div></div>
+        <div class="field"><label>Komisi D7</label><div class="input-wrap"><div class="input-pre">Rp</div><input type="number" id="inp-commission-d7" min="0" placeholder="0"></div></div>
+        <div class="field"><label>Klik</label><div class="input-wrap"><input type="number" id="inp-clicks" min="0" placeholder="0"><div class="input-suf">klik</div></div></div>
+        <div class="field"><label>Catatan</label><div class="input-wrap"><input type="text" id="inp-note" placeholder="misal: ganti creative"></div></div>
+        <div class="field" style="align-self:end"><button class="btn btn-primary" id="btn-add" style="height:38px;width:100%">+ Tambah & Sync</button></div>
+      </div>
+    </div>
+
+    <div class="card" id="histori-card" style="display:none">
+      <div class="card-title">Muat histori dari Google Sheets</div>
+      <div class="range-tabs" id="range-tabs">
+        <button class="range-tab" data-range="today">Hari Ini</button>
+        <button class="range-tab" data-range="yesterday">Kemarin</button>
+        <button class="range-tab active" data-range="7days">7 Hari</button>
+        <button class="range-tab" data-range="30days">30 Hari</button>
+        <button class="range-tab" data-range="thismonth">Bulan Ini</button>
+        <button class="range-tab" data-range="custom">Custom</button>
+      </div>
+      <div class="custom-range" id="custom-range">
+        <span>Dari</span><div class="input-wrap" style="width:auto"><input type="date" id="range-start" style="width:140px"></div>
+        <span>sampai</span><div class="input-wrap" style="width:auto"><input type="date" id="range-end" style="width:140px"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-success" id="btn-load">↓ Muat Data dari Sheets</button>
+        <button class="btn btn-sm" id="btn-clear-sheets">✕ Hapus cache Sheets</button>
+        <div class="load-status" id="load-status"></div>
+      </div>
+    </div>
+
+    <div id="unsync-banner" style="display:none" class="unsync-banner"><span>⚠ Ada <span id="unsync-count">0</span> data yang belum tersync ke Google Sheets.</span><button class="btn btn-sm" id="btn-retry">↺ Sync Ulang</button></div>
+
+    <div id="summary-section" style="display:none">
+      <div id="verdict-area"></div>
+      <div class="metrics-row" id="metrics-row"></div>
+      <div class="card" id="rank-section"></div>
+      <div class="card">
+        <div class="card-title">Grafik kumulatif 7 hari</div>
+        <div style="position:relative;height:220px"><canvas id="mainChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <div class="card-title" style="margin:0">Riwayat data</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="filter-product" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"><option value="">Semua produk</option></select>
+          <select id="filter-campaign" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"><option value="">Semua campaign</option></select>
+          <select id="filter-source" style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"><option value="">Semua sumber</option><option value="local">Lokal saja</option><option value="sheets">Sheets saja</option></select>
+        </div>
+      </div>
+      <div id="table-wrap"><div class="empty-state"><div class="ei">[ ]</div><p>Belum ada data. Tambahkan data di atas atau muat dari Sheets.</p></div></div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
 <script>
-const STORE_KEY='meta_shopee_tracker_v4';const URL_KEY='meta_shopee_script_url';const SHEETS_KEY='meta_shopee_sheets_data_v4';const TOKEN_KEY='meta_shopee_secret_token';let entries=JSON.parse(localStorage.getItem(STORE_KEY)||'[]');let sheetsData=JSON.parse(localStorage.getItem(SHEETS_KEY)||'[]');let scriptUrl=localStorage.getItem(URL_KEY)||'';let secretToken=localStorage.getItem(TOKEN_KEY)||'';let activeRange='7days';let chart;
-function localISODate(d=new Date()){const y=d.getFullYear();const m=String(d.getMonth()+1).padStart(2,'0');const day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}function makeRowId(){if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();return'row_'+Date.now()+'_'+Math.random().toString(36).slice(2)}
-document.getElementById('inp-date').value=localISODate();const today=localISODate();document.getElementById('range-end').value=today;const d7=new Date();d7.setDate(d7.getDate()-6);document.getElementById('range-start').value=localISODate(d7);if(scriptUrl){document.getElementById('inp-script-url').value=scriptUrl;document.getElementById('btn-dismiss').style.display='inline-flex';document.getElementById('histori-card').style.display='block';if(secretToken){document.getElementById('inp-secret-token').value=secretToken;updateSyncBadge('connected')}else updateSyncBadge('error','Token belum diisi')}
-const fmt=n=>'Rp '+Math.round(n).toLocaleString('id-ID');const fmtS=n=>{const a=Math.abs(n);const s=a>=1e6?(a/1e6).toFixed(1)+' jt':a>=1e3?(a/1e3).toFixed(0)+' rb':Math.round(a)+'';return(n<0?'-':'')+' Rp '+s};const fmtDate=s=>new Date(s+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});function esc(str){return String(str??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}function val(id){return document.getElementById(id).value.trim()}function numVal(id){return parseFloat(document.getElementById(id).value)||0}
-function totalCommission(e){return Number(e.commissionD0||0)+Number(e.commissionD1||0)+Number(e.commissionD3||0)+Number(e.commissionD7||0)}function normalizeEntry(e){const d0=Number(e.commissionD0??e.commission??0),d1=Number(e.commissionD1||0),d3=Number(e.commissionD3||0),d7=Number(e.commissionD7||0);const total=Number(e.totalCommission??e.commission??(d0+d1+d3+d7));const spend=Number(e.spend||0);return{...e,campaign:e.campaign||'',adset:e.adset||'',creative:e.creative||'',hook:e.hook||'',affiliateLink:e.affiliateLink||'',commissionD0:d0,commissionD1:d1,commissionD3:d3,commissionD7:d7,commission:total,totalCommission:total,profit:total-spend,ratio:spend>0?total/spend:0,status:e.status||getDecision(spend,total,e.clicks||0)}}
-function getDecision(spend,commission,clicks){const ratio=spend>0?commission/spend:0;const profit=commission-spend;if(spend<50000)return'WATCH';if(ratio>=1.5&&profit>0)return'SCALE';if(ratio>=1.0)return'HOLD';return'KILL'}function decisionClass(s){return{SCALE:'decision-scale',HOLD:'decision-hold',WATCH:'decision-watch',KILL:'decision-kill'}[s]||'decision-watch'}
-function getDateRange(){const now=new Date();const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const today=iso(now);if(activeRange==='today')return{start:today,end:today};if(activeRange==='yesterday'){const y=new Date(now);y.setDate(y.getDate()-1);const ys=iso(y);return{start:ys,end:ys}}if(activeRange==='7days'){const s=new Date(now);s.setDate(s.getDate()-6);return{start:iso(s),end:today}}if(activeRange==='30days'){const s=new Date(now);s.setDate(s.getDate()-29);return{start:iso(s),end:today}}if(activeRange==='thismonth'){const s=new Date(now.getFullYear(),now.getMonth(),1);return{start:iso(s),end:today}}if(activeRange==='custom')return{start:document.getElementById('range-start').value||today,end:document.getElementById('range-end').value||today};return{start:today,end:today}}
-function setRange(range,btn){activeRange=range;document.querySelectorAll('.range-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const cr=document.getElementById('custom-range');if(range==='custom'){cr.classList.add('show');return}cr.classList.remove('show');const{start,end}=getDateRange();document.getElementById('range-start').value=start;document.getElementById('range-end').value=end}
-function toast(msg,type='info',dur=2500){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast ${type} show`;setTimeout(()=>el.classList.remove('show'),dur)}function updateSyncBadge(state,label){const badge=document.getElementById('sync-badge');const dot=document.getElementById('sync-dot');const lbl=document.getElementById('sync-label');badge.className='sync-badge '+state;dot.className='sync-dot'+(state==='syncing'?' pulse':'');lbl.textContent=label||({connected:'Terhubung ke Sheets',error:'Gagal terhubung',syncing:'Menyimpan...','':'Belum terhubung'}[state]||'Belum terhubung')}
-function onUrlChange(){if(!val('inp-script-url'))updateSyncBadge('','Belum terhubung')}function onTokenChange(){if(!val('inp-secret-token'))updateSyncBadge('error','Token belum diisi')}function getSecretToken(){return(secretToken||localStorage.getItem(TOKEN_KEY)||'').trim()}
-async function saveAndTestUrl(){const url=val('inp-script-url');const token=val('inp-secret-token');if(!url.includes('script.google.com')){toast('⚠ URL tidak valid','error');return}if(!token){toast('⚠ Isi token rahasia dulu','error');updateSyncBadge('error','Token belum diisi');return}scriptUrl=url;secretToken=token;updateSyncBadge('syncing','Menguji koneksi...');try{await sendToSheets(url,{action:'test'});localStorage.setItem(URL_KEY,scriptUrl);localStorage.setItem(TOKEN_KEY,secretToken);updateSyncBadge('connected');document.getElementById('btn-dismiss').style.display='inline-flex';document.getElementById('histori-card').style.display='block';toast('✓ Berhasil terhubung ke Google Sheets!','success');retryUnsync()}catch(err){updateSyncBadge('error','Gagal terhubung');toast('✕ Gagal: '+err.message,'error',4000)}}function dismissSetup(){document.getElementById('setup-banner').style.display='none'}
-async function sendToSheets(url,data){const token=getSecretToken();if(!token)throw new Error('Token belum diisi');const payload={...data,token};const res=await fetch(url,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain'}});const json=await res.json();if(json.status!=='ok')throw new Error(json.message||'Gagal');return json}
-async function loadFromSheets(){if(!scriptUrl){toast('⚠ Belum terhubung ke Sheets','error');return}const token=getSecretToken();if(!token){toast('⚠ Token belum diisi','error');updateSyncBadge('error','Token belum diisi');return}const{start,end}=getDateRange();const btn=document.getElementById('btn-load');const status=document.getElementById('load-status');btn.disabled=true;btn.textContent='↻ Memuat...';status.className='load-status loading';status.textContent='Mengambil data dari Google Sheets...';updateSyncBadge('syncing','Memuat histori...');try{const url=`${scriptUrl}?startDate=${start}&endDate=${end}&token=${encodeURIComponent(token)}`;const res=await fetch(url);const json=await res.json();if(json.status!=='ok')throw new Error(json.message||'Gagal fetch');sheetsData=(json.data||[]).map(normalizeEntry);localStorage.setItem(SHEETS_KEY,JSON.stringify(sheetsData));render();updateSyncBadge('connected');status.className='load-status success';status.textContent=`✓ ${sheetsData.length} data dimuat (${start} – ${end})`;toast(`✓ ${sheetsData.length} data berhasil dimuat dari Sheets`,'success')}catch(err){updateSyncBadge('error','Gagal load');status.className='load-status error';status.textContent='✕ Gagal: '+err.message;toast('✕ Gagal muat data: '+err.message,'error',4000)}finally{btn.disabled=false;btn.textContent='↓ Muat Data dari Sheets'}}function clearSheetsData(){sheetsData=[];localStorage.removeItem(SHEETS_KEY);render();toast('Data Sheets dihapus dari tampilan','info')}
-async function addEntry(){const date=val('inp-date');const spend=numVal('inp-spend');const d0=numVal('inp-commission-d0'),d1=numVal('inp-commission-d1'),d3=numVal('inp-commission-d3'),d7=numVal('inp-commission-d7');const total=d0+d1+d3+d7;const clicks=parseInt(val('inp-clicks'),10)||0;if(!date){toast('⚠ Pilih tanggal dulu','error');return}if(spend<=0&&total<=0){toast('⚠ Isi minimal spend atau komisi','error');return}const rowId=makeRowId();const entry=normalizeEntry({id:rowId,rowId,date,campaign:val('inp-campaign'),adset:val('inp-adset'),creative:val('inp-creative'),hook:val('inp-hook'),product:val('inp-product')||'—',affiliateLink:val('inp-link'),spend,commissionD0:d0,commissionD1:d1,commissionD3:d3,commissionD7:d7,clicks,note:val('inp-note'),synced:false,source:'local'});entries.push(entry);entries.sort((a,b)=>a.date.localeCompare(b.date));save();['inp-campaign','inp-adset','inp-creative','inp-hook','inp-product','inp-link','inp-spend','inp-commission-d0','inp-commission-d1','inp-commission-d3','inp-commission-d7','inp-clicks','inp-note'].forEach(id=>document.getElementById(id).value='');render();if(scriptUrl){const btn=document.getElementById('btn-add');btn.disabled=true;btn.textContent='↻ Menyimpan...';updateSyncBadge('syncing');try{await sendToSheets(scriptUrl,entry);entry.synced=true;save();render();updateSyncBadge('connected');toast('✓ Data tersimpan ke Google Sheets','success')}catch(err){updateSyncBadge('error','Gagal sync');toast('⚠ Disimpan lokal, sync gagal: '+err.message,'error',4000)}finally{btn.disabled=false;btn.textContent='+ Tambah & Sync'}}else toast('✓ Data disimpan lokal','info')}
-async function retryUnsync(){if(!scriptUrl)return;const unsynced=entries.filter(e=>!e.synced);if(!unsynced.length){renderUnsyncBanner();return}updateSyncBadge('syncing',`Sync ${unsynced.length} data...`);let ok=0;for(const e of unsynced){try{await sendToSheets(scriptUrl,normalizeEntry(e));e.synced=true;ok++}catch(_){}}save();render();if(ok===unsynced.length){updateSyncBadge('connected');toast(`✓ ${ok} data berhasil sync`,'success')}else{updateSyncBadge('error',`${unsynced.length-ok} gagal`);toast(`⚠ ${ok}/${unsynced.length} berhasil`,'error',3000)}}function renderUnsyncBanner(){const unsynced=entries.filter(e=>!e.synced&&scriptUrl);const banner=document.getElementById('unsync-banner');if(unsynced.length&&scriptUrl){document.getElementById('unsync-count').textContent=unsynced.length;banner.style.display='flex'}else banner.style.display='none'}
-async function deleteEntry(entryData,source){const label=source==='sheets'?'data Sheets':'data lokal';if(!confirm(`Hapus ${label} ini?\nTanggal: ${entryData.date} | Produk: ${entryData.product}\n\n${source==='sheets'?'Data akan terhapus dari Google Sheets.':'Data akan terhapus dari lokal dan Google Sheets.'}`))return;if(source!=='sheets'){entries=entries.filter(e=>e.id!==entryData.id);save()}if(source==='sheets'){sheetsData=sheetsData.filter(e=>(e.rowId||e.id)!==(entryData.rowId||entryData.id));localStorage.setItem(SHEETS_KEY,JSON.stringify(sheetsData))}render();if(scriptUrl){updateSyncBadge('syncing','Menghapus dari Sheets...');try{const json=await sendToSheets(scriptUrl,{action:'delete',rowId:entryData.rowId||entryData.id||'',date:entryData.date,product:entryData.product,spend:entryData.spend,commission:entryData.commission||entryData.totalCommission||0,clicks:entryData.clicks||0,note:entryData.note||''});if(json.status==='ok'&&json.deleted){updateSyncBadge('connected');toast('✓ Data berhasil dihapus dari Sheets','success')}else if(json.status==='ok'&&!json.deleted){updateSyncBadge('connected');toast('⚠ Dihapus lokal, tapi baris tidak ditemukan di Sheets','info',3500)}else throw new Error(json.message||'Gagal')}catch(err){updateSyncBadge('error','Gagal hapus di Sheets');toast('⚠ Dihapus lokal tapi gagal hapus di Sheets: '+err.message,'error',4000)}}else toast('✓ Data dihapus (belum terhubung ke Sheets)','info')}
-function confirmReset(){if(confirm('Reset semua data lokal dan cache Sheets?\nData di Google Sheets TIDAK ikut terhapus.')){entries=[];sheetsData=[];save();localStorage.removeItem(SHEETS_KEY);render();toast('Data lokal & cache direset','info')}}function save(){localStorage.setItem(STORE_KEY,JSON.stringify(entries))}
-function getCombinedData(){const localIds=new Set(entries.map(e=>e.rowId||e.id));const sheetsOnly=sheetsData.filter(e=>!localIds.has(e.rowId||e.id));return[...entries.map(normalizeEntry),...sheetsOnly.map(normalizeEntry)].sort((a,b)=>a.date.localeCompare(b.date))}function getFiltered(){const prod=document.getElementById('filter-product').value,camp=document.getElementById('filter-campaign').value,src=document.getElementById('filter-source').value;let data=getCombinedData();if(prod)data=data.filter(e=>e.product===prod);if(camp)data=data.filter(e=>e.campaign===camp);if(src==='local')data=data.filter(e=>e.source==='local'||!e.source);if(src==='sheets')data=data.filter(e=>e.source==='sheets');return data}
-function updateFilters(){const all=getCombinedData();updateSelect('filter-product',[...new Set(all.map(e=>e.product).filter(p=>p&&p!=='—'))],'Semua produk');updateSelect('filter-campaign',[...new Set(all.map(e=>e.campaign).filter(Boolean))],'Semua campaign')}function updateSelect(id,items,label){const sel=document.getElementById(id);const cur=sel.value;sel.innerHTML=`<option value="">${label}</option>`;items.forEach(v=>{const opt=document.createElement('option');opt.value=v;opt.textContent=v;if(v===cur)opt.selected=true;sel.appendChild(opt)})}
-function render(){updateFilters();renderUnsyncBanner();const data=getFiltered();renderMetrics(data);renderRanks(data);renderTable(data);renderChart(data);document.getElementById('summary-section').style.display=data.length?'block':'none'}
-function renderMetrics(data){if(!data.length)return;const totalSpend=data.reduce((s,e)=>s+e.spend,0),totalComm=data.reduce((s,e)=>s+e.totalCommission,0),profit=totalComm-totalSpend,ratio=totalSpend>0?totalComm/totalSpend:0,days=new Set(data.map(e=>e.date)).size,rowCount=data.length,totalClicks=data.reduce((s,e)=>s+(e.clicks||0),0),cpc=totalClicks>0?totalSpend/totalClicks:0,sheetsCount=data.filter(e=>e.source==='sheets').length,localCount=data.filter(e=>!e.source||e.source==='local').length,roi=totalSpend>0?(profit/totalSpend)*100:0;let vClass,vIcon,vMsg;if(totalSpend===0){vClass='neutral';vIcon='→';vMsg='Tambah data spend iklan untuk melihat analisis.'}else if(ratio>=1.5){vClass='good';vIcon='▲';vMsg=`K/S Ratio ${ratio.toFixed(2)}x — kandidat scale. Profit ${fmtS(profit)} dari total komisi D0-D7.`}else if(ratio>=1.0){vClass='warn';vIcon='~';vMsg=`K/S Ratio ${ratio.toFixed(2)}x — hampir impas. Perlu optimasi creative/adset.`}else{vClass='bad';vIcon='▼';vMsg=`K/S Ratio ${ratio.toFixed(2)}x — masih boncos ${fmtS(Math.abs(profit))}. Cek status KILL/WATCH per baris.`}document.getElementById('verdict-area').innerHTML=`<div class="verdict-bar ${vClass}"><span class="verdict-icon">${vIcon}</span><span>${vMsg}</span></div>`;const rC=ratio>=1.5?'green':ratio>=1?'amber':'red',pC=profit>=0?'green':'red',pCard=profit>0?'good':profit<0?'bad':'';document.getElementById('metrics-row').innerHTML=`<div class="metric-card info"><div class="metric-label">Total Spend</div><div class="metric-val blue">${fmtS(totalSpend)}</div><div class="metric-sub">${days} hari · ${rowCount} baris</div></div><div class="metric-card"><div class="metric-label">Total Komisi D0-D7</div><div class="metric-val">${fmtS(totalComm)}</div><div class="metric-sub">${fmtS(totalComm/days)}/hari rata-rata</div></div><div class="metric-card ${pCard}"><div class="metric-label">Profit / Rugi</div><div class="metric-val ${pC}">${profit>=0?'+':''}${fmtS(profit)}</div><div class="metric-sub">ROI: ${totalSpend>0?roi.toFixed(1)+'%':'—'}</div></div><div class="metric-card"><div class="metric-label">K/S Ratio 7 Hari</div><div class="metric-val ${rC}">${totalSpend>0?ratio.toFixed(2)+'x':'—'}</div><div class="metric-sub">Komisi dibagi spend</div></div>${totalClicks>0?`<div class="metric-card"><div class="metric-label">Total Klik</div><div class="metric-val">${totalClicks.toLocaleString('id-ID')}</div><div class="metric-sub">CPC: ${fmt(cpc)}</div></div>`:''}<div class="metric-card"><div class="metric-label">Sumber Data</div><div class="metric-val" style="font-size:16px">${localCount+sheetsCount}</div><div class="metric-sub">${localCount} lokal · ${sheetsCount} sheets</div></div>`}
-function groupBy(data,key){const m={};data.forEach(e=>{const k=e[key]||'—';if(!m[k])m[k]={name:k,spend:0,comm:0,profit:0,clicks:0,count:0};m[k].spend+=e.spend;m[k].comm+=e.totalCommission;m[k].profit+=e.totalCommission-e.spend;m[k].clicks+=e.clicks||0;m[k].count++});return Object.values(m).sort((a,b)=>b.profit-a.profit).slice(0,5)}function rankTable(title,items){if(!items.length)return'';return`<div style="margin-bottom:16px"><div class="metric-label" style="margin-bottom:8px">${title}</div><div style="overflow-x:auto"><table><thead><tr><th>Nama</th><th class="num">Spend</th><th class="num">Komisi</th><th class="num">Profit</th><th class="num">K/S</th><th class="num">Klik</th></tr></thead><tbody>${items.map(x=>{const ratio=x.spend>0?x.comm/x.spend:0;return`<tr><td>${esc(x.name)}</td><td class="num">${fmt(x.spend)}</td><td class="num">${fmt(x.comm)}</td><td class="profit-cell ${x.profit>=0?'pos':'neg'}">${x.profit>=0?'+':''}${fmt(x.profit)}</td><td class="roas-cell ${ratio>=1.5?'great':ratio>=1?'ok':'bad'}">${ratio.toFixed(2)}x</td><td class="num">${x.clicks||'—'}</td></tr>`}).join('')}</tbody></table></div></div>`}function renderRanks(data){document.getElementById('rank-section').innerHTML=`<div class="card-title">Ranking cepat</div>${rankTable('Top Campaign',groupBy(data,'campaign'))}${rankTable('Top Adset',groupBy(data,'adset'))}${rankTable('Top Creative',groupBy(data,'creative'))}`}
-function renderTable(data){const wrap=document.getElementById('table-wrap');if(!data.length){wrap.innerHTML='<div class="empty-state"><div class="ei">[ ]</div><p>Belum ada data. Tambahkan di atas atau muat dari Sheets.</p></div>';return}const rows=[...data].reverse().map(e=>{const profit=e.totalCommission-e.spend,ratio=e.spend>0?e.totalCommission/e.spend:null,rC=ratio===null?'':ratio>=1.5?'great':ratio>=1?'ok':'bad',pC=profit>=0?'pos':'neg',prod=e.product!=='—'?`<span class="product-badge">${esc(e.product)}</span>`:`<span style="color:var(--muted);font-size:12px">—</span>`,src=e.source||'local',srcBadge=src==='sheets'?`<span class="source-badge source-sheets">Sheets</span>`:`<span class="source-badge source-local">Lokal</span>`,syncIcon=src==='sheets'?`<span class="synced-icon" title="Dari Google Sheets">☁</span>`:(e.synced?`<span class="synced-icon" title="Tersimpan di Sheets">✓</span>`:`<span class="unsynced-icon" title="Belum sync" onclick="retryUnsync()">⏳</span>`),entryJson=JSON.stringify({id:e.id,rowId:e.rowId||'',date:e.date,product:e.product,spend:e.spend,commission:e.totalCommission,clicks:e.clicks||0,note:e.note||'',source:src}).replace(/'/g,'&#39;'),deleteBtn=`<button class="btn btn-sm btn-danger" style="${src==='sheets'?'color:#1a4f8a;border-color:#a8c0e8':''}" onclick="deleteEntry(JSON.parse(this.dataset.entry),this.dataset.source)" data-entry='${entryJson}' data-source="${src}" title="${src==='sheets'?'Hapus dari Sheets':'Hapus lokal & Sheets'}">${src==='sheets'?'✕ Sheets':'✕'}</button>`;return`<tr><td>${fmtDate(e.date)}${e.inputTime?`<br><span style="font-size:10px;color:var(--muted)">${esc(e.inputTime)}</span>`:''}</td><td><span class="tag-badge">${esc(e.campaign||'—')}</span><br><span style="font-size:11px;color:var(--muted)">${esc(e.adset||'—')}</span></td><td><span class="tag-badge">${esc(e.creative||'—')}</span><br><span style="font-size:11px;color:var(--muted)">${esc(e.hook||'—')}</span></td><td>${prod} ${srcBadge}</td><td class="num">${fmt(e.spend)}</td><td class="num">${fmt(e.commissionD0)}</td><td class="num">${fmt(e.commissionD1)}</td><td class="num">${fmt(e.commissionD3)}</td><td class="num">${fmt(e.commissionD7)}</td><td class="num">${fmt(e.totalCommission)}</td><td class="profit-cell ${pC}">${profit>=0?'+':''}${fmt(profit)}</td><td class="roas-cell ${rC}">${ratio!==null?ratio.toFixed(2)+'x':'—'}</td><td><span class="decision-badge ${decisionClass(e.status)}">${esc(e.status)}</span></td><td class="num">${e.clicks>0?e.clicks.toLocaleString('id-ID'):'—'}</td><td class="sync-cell">${scriptUrl?syncIcon:'—'}</td><td style="text-align:center">${deleteBtn}</td></tr>`}).join('');wrap.innerHTML=`<div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Campaign / Adset</th><th>Creative / Hook</th><th>Produk</th><th class="num">Spend</th><th class="num">D0</th><th class="num">D1</th><th class="num">D3</th><th class="num">D7</th><th class="num">Total Komisi</th><th class="num">Profit</th><th class="num">K/S</th><th>Status</th><th class="num">Klik</th><th style="text-align:center">Sheets</th><th style="text-align:center">Hapus</th></tr></thead><tbody>${rows}</tbody></table></div>`}
-function renderChart(data){if(!data.length)return;const labels=[],spendCum=[],commCum=[],profitCum=[];let cs=0,cc=0;data.forEach(e=>{cs+=e.spend;cc+=e.totalCommission;labels.push(new Date(e.date+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short'}));spendCum.push(cs);commCum.push(cc);profitCum.push(cc-cs)});const boncos=profitCum[profitCum.length-1]<0;if(chart){chart.data.labels=labels;chart.data.datasets[0].data=spendCum;chart.data.datasets[1].data=commCum;chart.data.datasets[2].data=profitCum;chart.data.datasets[2].borderColor=boncos?'#b83232':'#1a7a52';chart.update();return}const ctx=document.getElementById('mainChart').getContext('2d');chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Spend',data:spendCum,borderColor:'#2d5be3',backgroundColor:'rgba(45,91,227,0.06)',fill:true,tension:.35,pointRadius:3,borderWidth:2},{label:'Komisi D0-D7',data:commCum,borderColor:'#1a7a52',backgroundColor:'rgba(26,122,82,0.06)',fill:true,tension:.35,pointRadius:3,borderWidth:2},{label:'Profit/Rugi',data:profitCum,borderColor:boncos?'#b83232':'#1a7a52',backgroundColor:boncos?'rgba(184,50,50,0.06)':'rgba(26,122,82,0.06)',fill:true,tension:.35,pointRadius:3,borderWidth:2,borderDash:[5,3]}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const v=c.parsed.y,s=c.datasetIndex===2&&v>=0?'+':'';return' '+c.dataset.label+': '+s+'Rp '+Math.round(v).toLocaleString('id-ID')}}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#7a7870',font:{family:'JetBrains Mono',size:9}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#7a7870',font:{family:'JetBrains Mono',size:9},callback:v=>{const a=Math.abs(v);return(v<0?'-':'')+(a>=1e6?(a/1e6).toFixed(1)+'jt':a>=1e3?(a/1e3).toFixed(0)+'rb':Math.round(a))}}}}})}
-function exportCSV(){const data=getCombinedData();if(!data.length){toast('⚠ Tidak ada data','error');return}const header=['Tanggal','Campaign','Adset','Creative','Hook','Produk','Link Affiliate','Spend Rp','Komisi D0','Komisi D1','Komisi D3','Komisi D7','Total Komisi','Profit/Rugi Rp','K/S Ratio','Klik','Status','Catatan','Sumber'];const rows=data.map(e=>[e.date,e.campaign,e.adset,e.creative,e.hook,e.product,e.affiliateLink,e.spend,e.commissionD0,e.commissionD1,e.commissionD3,e.commissionD7,e.totalCommission,e.totalCommission-e.spend,e.spend>0?(e.totalCommission/e.spend).toFixed(2):'—',e.clicks||0,e.status,e.note||'',e.source||'lokal'].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));const blob=new Blob([[header.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tracker-iklan-shopee-v4.csv';a.click();toast('✓ CSV didownload','success')}
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id.startsWith('inp-')&&!['inp-script-url','inp-secret-token'].includes(e.target.id))addEntry()});render();
+(() => {
+  'use strict';
+
+  const STORE_KEY = 'meta_shopee_tracker_v4';
+  const URL_KEY = 'meta_shopee_script_url';
+  const SHEETS_KEY = 'meta_shopee_sheets_data_v4';
+  const TOKEN_KEY = 'meta_shopee_secret_token';
+
+  let entries = safeParse(localStorage.getItem(STORE_KEY), []);
+  let sheetsData = safeParse(localStorage.getItem(SHEETS_KEY), []);
+  let scriptUrl = localStorage.getItem(URL_KEY) || '';
+  let secretToken = localStorage.getItem(TOKEN_KEY) || '';
+  let activeRange = '7days';
+  let chart = null;
+
+  const $ = (id) => document.getElementById(id);
+  const money = (n) => 'Rp ' + Math.round(Number(n) || 0).toLocaleString('id-ID');
+  const shortMoney = (n) => {
+    const v = Number(n) || 0;
+    const a = Math.abs(v);
+    const s = a >= 1e6 ? (a / 1e6).toFixed(1) + ' jt' : a >= 1e3 ? (a / 1e3).toFixed(0) + ' rb' : Math.round(a) + '';
+    return (v < 0 ? '-' : '') + 'Rp ' + s;
+  };
+  const esc = (str) => String(str ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  const val = (id) => $(id).value.trim();
+  const numVal = (id) => Number.parseFloat($(id).value) || 0;
+
+  function safeParse(raw, fallback) {
+    try { return raw ? JSON.parse(raw) : fallback; } catch { return fallback; }
+  }
+  function localISODate(d = new Date()) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  function makeRowId() {
+    return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'row_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  }
+  function fmtDate(s) {
+    if (!s) return '-';
+    return new Date(s + 'T00:00:00').toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
+  }
+  function getDecision(spend, commission) {
+    const ratio = spend > 0 ? commission / spend : 0;
+    const profit = commission - spend;
+    if (spend < 50000) return 'WATCH';
+    if (ratio >= 1.5 && profit > 0) return 'SCALE';
+    if (ratio >= 1.0) return 'HOLD';
+    return 'KILL';
+  }
+  function decisionClass(s) {
+    return { SCALE:'decision-scale', HOLD:'decision-hold', WATCH:'decision-watch', KILL:'decision-kill' }[s] || 'decision-watch';
+  }
+  function normalizeEntry(e) {
+    const d0 = Number(e.commissionD0 ?? e.commission ?? 0) || 0;
+    const d1 = Number(e.commissionD1 || 0) || 0;
+    const d3 = Number(e.commissionD3 || 0) || 0;
+    const d7 = Number(e.commissionD7 || 0) || 0;
+    const total = Number(e.totalCommission ?? e.commission ?? (d0 + d1 + d3 + d7)) || 0;
+    const spend = Number(e.spend || 0) || 0;
+    return {
+      ...e,
+      id: e.id || e.rowId || makeRowId(),
+      rowId: e.rowId || e.id || '',
+      date: e.date || localISODate(),
+      campaign: e.campaign || '',
+      adset: e.adset || '',
+      creative: e.creative || '',
+      hook: e.hook || '',
+      product: e.product || '—',
+      affiliateLink: e.affiliateLink || '',
+      spend,
+      commissionD0: d0,
+      commissionD1: d1,
+      commissionD3: d3,
+      commissionD7: d7,
+      commission: total,
+      totalCommission: total,
+      profit: total - spend,
+      ratio: spend > 0 ? total / spend : 0,
+      clicks: Number(e.clicks || 0) || 0,
+      status: e.status || getDecision(spend, total),
+      note: e.note || '',
+      source: e.source || 'local',
+      synced: Boolean(e.synced)
+    };
+  }
+
+  function init() {
+    $('inp-date').value = localISODate();
+    $('range-end').value = localISODate();
+    const d7 = new Date(); d7.setDate(d7.getDate() - 6);
+    $('range-start').value = localISODate(d7);
+
+    if (scriptUrl) {
+      $('inp-script-url').value = scriptUrl;
+      $('histori-card').style.display = 'block';
+      $('btn-dismiss').style.display = 'inline-flex';
+      if (secretToken) {
+        $('inp-secret-token').value = secretToken;
+        updateSyncBadge('connected');
+      } else {
+        updateSyncBadge('error', 'Token belum diisi');
+      }
+    }
+
+    $('btn-test').addEventListener('click', saveAndTestUrl);
+    $('btn-dismiss').addEventListener('click', () => $('setup-banner').style.display = 'none');
+    $('btn-add').addEventListener('click', addEntry);
+    $('btn-load').addEventListener('click', loadFromSheets);
+    $('btn-clear-sheets').addEventListener('click', clearSheetsData);
+    $('btn-retry').addEventListener('click', retryUnsync);
+    $('btn-export').addEventListener('click', exportCSV);
+    $('btn-reset').addEventListener('click', confirmReset);
+    $('filter-product').addEventListener('change', render);
+    $('filter-campaign').addEventListener('change', render);
+    $('filter-source').addEventListener('change', render);
+    $('inp-script-url').addEventListener('input', () => { if (!val('inp-script-url')) updateSyncBadge('', 'Belum terhubung'); });
+    $('inp-secret-token').addEventListener('input', () => { if (!val('inp-secret-token')) updateSyncBadge('error', 'Token belum diisi'); });
+    document.querySelectorAll('.range-tab').forEach((btn) => btn.addEventListener('click', () => setRange(btn.dataset.range, btn)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target.id && e.target.id.startsWith('inp-') && !['inp-script-url','inp-secret-token'].includes(e.target.id)) addEntry();
+    });
+    render();
+  }
+
+  function toast(msg, type = 'info', dur = 2500) {
+    const el = $('toast');
+    el.textContent = msg;
+    el.className = `toast ${type} show`;
+    setTimeout(() => el.classList.remove('show'), dur);
+  }
+  function updateSyncBadge(state, label) {
+    const badge = $('sync-badge'), dot = $('sync-dot'), lbl = $('sync-label');
+    badge.className = 'sync-badge ' + state;
+    dot.className = 'sync-dot' + (state === 'syncing' ? ' pulse' : '');
+    lbl.textContent = label || ({connected:'Terhubung ke Sheets', error:'Gagal terhubung', syncing:'Menyimpan...', '':'Belum terhubung'}[state] || 'Belum terhubung');
+  }
+  function getSecretToken() {
+    return (secretToken || localStorage.getItem(TOKEN_KEY) || '').trim();
+  }
+  async function sendToSheets(url, data) {
+    const token = getSecretToken();
+    if (!token) throw new Error('Token belum diisi');
+    const res = await fetch(url, { method:'POST', body: JSON.stringify({...data, token}), headers:{'Content-Type':'text/plain'} });
+    const json = await res.json();
+    if (json.status !== 'ok') throw new Error(json.message || 'Gagal');
+    return json;
+  }
+  async function saveAndTestUrl() {
+    const url = val('inp-script-url');
+    const token = val('inp-secret-token');
+    if (!url.includes('script.google.com')) { toast('⚠ URL tidak valid', 'error'); return; }
+    if (!token) { toast('⚠ Isi token rahasia dulu', 'error'); updateSyncBadge('error', 'Token belum diisi'); return; }
+    scriptUrl = url; secretToken = token;
+    updateSyncBadge('syncing', 'Menguji koneksi...');
+    try {
+      await sendToSheets(url, { action:'test' });
+      localStorage.setItem(URL_KEY, scriptUrl);
+      localStorage.setItem(TOKEN_KEY, secretToken);
+      $('histori-card').style.display = 'block';
+      $('btn-dismiss').style.display = 'inline-flex';
+      updateSyncBadge('connected');
+      toast('✓ Berhasil terhubung ke Google Sheets!', 'success');
+      retryUnsync();
+    } catch (err) {
+      updateSyncBadge('error', 'Gagal terhubung');
+      toast('✕ Gagal: ' + err.message, 'error', 4000);
+    }
+  }
+  function getDateRange() {
+    const now = new Date();
+    const today = localISODate(now);
+    if (activeRange === 'today') return { start: today, end: today };
+    if (activeRange === 'yesterday') { const d = new Date(now); d.setDate(d.getDate() - 1); const y = localISODate(d); return { start: y, end: y }; }
+    if (activeRange === '7days') { const d = new Date(now); d.setDate(d.getDate() - 6); return { start: localISODate(d), end: today }; }
+    if (activeRange === '30days') { const d = new Date(now); d.setDate(d.getDate() - 29); return { start: localISODate(d), end: today }; }
+    if (activeRange === 'thismonth') return { start: localISODate(new Date(now.getFullYear(), now.getMonth(), 1)), end: today };
+    return { start: $('range-start').value || today, end: $('range-end').value || today };
+  }
+  function setRange(range, btn) {
+    activeRange = range;
+    document.querySelectorAll('.range-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    $('custom-range').classList.toggle('show', range === 'custom');
+    if (range !== 'custom') { const r = getDateRange(); $('range-start').value = r.start; $('range-end').value = r.end; }
+  }
+  async function loadFromSheets() {
+    if (!scriptUrl) { toast('⚠ Belum terhubung ke Sheets', 'error'); return; }
+    const token = getSecretToken();
+    if (!token) { toast('⚠ Token belum diisi', 'error'); updateSyncBadge('error', 'Token belum diisi'); return; }
+    const { start, end } = getDateRange();
+    const btn = $('btn-load'), status = $('load-status');
+    btn.disabled = true; btn.textContent = '↻ Memuat...'; status.className = 'load-status loading'; status.textContent = 'Mengambil data dari Google Sheets...'; updateSyncBadge('syncing', 'Memuat histori...');
+    try {
+      const url = `${scriptUrl}?startDate=${encodeURIComponent(start)}&endDate=${encodeURIComponent(end)}&token=${encodeURIComponent(token)}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      if (json.status !== 'ok') throw new Error(json.message || 'Gagal fetch');
+      sheetsData = (json.data || []).map(normalizeEntry);
+      localStorage.setItem(SHEETS_KEY, JSON.stringify(sheetsData));
+      render(); updateSyncBadge('connected');
+      status.className = 'load-status success'; status.textContent = `✓ ${sheetsData.length} data dimuat (${start} – ${end})`;
+      toast(`✓ ${sheetsData.length} data berhasil dimuat dari Sheets`, 'success');
+    } catch (err) {
+      updateSyncBadge('error', 'Gagal load'); status.className = 'load-status error'; status.textContent = '✕ Gagal: ' + err.message; toast('✕ Gagal muat data: ' + err.message, 'error', 4000);
+    } finally {
+      btn.disabled = false; btn.textContent = '↓ Muat Data dari Sheets';
+    }
+  }
+  function clearSheetsData() { sheetsData = []; localStorage.removeItem(SHEETS_KEY); render(); toast('Cache data Sheets dihapus dari tampilan', 'info'); }
+
+  async function addEntry() {
+    const spend = numVal('inp-spend');
+    const entry = normalizeEntry({
+      id: makeRowId(),
+      date: val('inp-date'),
+      campaign: val('inp-campaign'),
+      adset: val('inp-adset'),
+      creative: val('inp-creative'),
+      hook: val('inp-hook'),
+      product: val('inp-product') || '—',
+      affiliateLink: val('inp-link'),
+      spend,
+      commissionD0: numVal('inp-commission-d0'),
+      commissionD1: numVal('inp-commission-d1'),
+      commissionD3: numVal('inp-commission-d3'),
+      commissionD7: numVal('inp-commission-d7'),
+      clicks: Number.parseInt(val('inp-clicks'), 10) || 0,
+      note: val('inp-note'),
+      synced: false,
+      source: 'local'
+    });
+    entry.rowId = entry.id;
+    if (!entry.date) { toast('⚠ Pilih tanggal dulu', 'error'); return; }
+    if (entry.spend <= 0 && entry.totalCommission <= 0) { toast('⚠ Isi minimal spend atau komisi', 'error'); return; }
+    entries.push(entry); entries.sort((a,b) => a.date.localeCompare(b.date)); save();
+    ['inp-campaign','inp-adset','inp-creative','inp-hook','inp-product','inp-link','inp-spend','inp-commission-d0','inp-commission-d1','inp-commission-d3','inp-commission-d7','inp-clicks','inp-note'].forEach(id => $(id).value = '');
+    render();
+    if (scriptUrl) {
+      const btn = $('btn-add'); btn.disabled = true; btn.textContent = '↻ Menyimpan...'; updateSyncBadge('syncing');
+      try { await sendToSheets(scriptUrl, entry); entry.synced = true; save(); render(); updateSyncBadge('connected'); toast('✓ Data tersimpan ke Google Sheets', 'success'); }
+      catch (err) { updateSyncBadge('error', 'Gagal sync'); toast('⚠ Disimpan lokal, sync gagal: ' + err.message, 'error', 4000); }
+      finally { btn.disabled = false; btn.textContent = '+ Tambah & Sync'; }
+    } else toast('✓ Data disimpan lokal', 'info');
+  }
+  async function retryUnsync() {
+    if (!scriptUrl) return;
+    const unsynced = entries.filter(e => !e.synced);
+    if (!unsynced.length) { renderUnsyncBanner(); return; }
+    updateSyncBadge('syncing', `Sync ${unsynced.length} data...`);
+    let ok = 0;
+    for (const e of unsynced) {
+      try { await sendToSheets(scriptUrl, normalizeEntry(e)); e.synced = true; ok++; } catch {}
+    }
+    save(); render();
+    if (ok === unsynced.length) { updateSyncBadge('connected'); toast(`✓ ${ok} data berhasil sync`, 'success'); }
+    else { updateSyncBadge('error', `${unsynced.length - ok} gagal`); toast(`⚠ ${ok}/${unsynced.length} berhasil`, 'error', 3000); }
+  }
+  function renderUnsyncBanner() {
+    const unsynced = entries.filter(e => !e.synced && scriptUrl);
+    $('unsync-count').textContent = unsynced.length;
+    $('unsync-banner').style.display = unsynced.length ? 'flex' : 'none';
+  }
+  async function deleteEntry(entryData, source) {
+    if (!confirm(`Hapus ${source === 'sheets' ? 'data Sheets' : 'data lokal'} ini?\nTanggal: ${entryData.date} | Produk: ${entryData.product}`)) return;
+    if (source !== 'sheets') { entries = entries.filter(e => e.id !== entryData.id); save(); }
+    if (source === 'sheets') { sheetsData = sheetsData.filter(e => (e.rowId || e.id) !== (entryData.rowId || entryData.id)); localStorage.setItem(SHEETS_KEY, JSON.stringify(sheetsData)); }
+    render();
+    if (!scriptUrl) { toast('✓ Data dihapus dari tampilan lokal', 'info'); return; }
+    try {
+      updateSyncBadge('syncing', 'Menghapus dari Sheets...');
+      const json = await sendToSheets(scriptUrl, { action:'delete', rowId: entryData.rowId || entryData.id || '', date: entryData.date, product: entryData.product, spend: entryData.spend, commission: entryData.totalCommission || entryData.commission || 0, clicks: entryData.clicks || 0, note: entryData.note || '' });
+      updateSyncBadge('connected');
+      toast(json.deleted ? '✓ Data berhasil dihapus dari Sheets' : '⚠ Baris tidak ditemukan di Sheets', json.deleted ? 'success' : 'info');
+    } catch (err) { updateSyncBadge('error', 'Gagal hapus di Sheets'); toast('⚠ Gagal hapus di Sheets: ' + err.message, 'error', 4000); }
+  }
+  function confirmReset() {
+    if (!confirm('Reset semua data lokal dan cache Sheets?\nData di Google Sheets TIDAK ikut terhapus.')) return;
+    entries = []; sheetsData = []; save(); localStorage.removeItem(SHEETS_KEY); render(); toast('Data lokal & cache direset', 'info');
+  }
+  function save() { localStorage.setItem(STORE_KEY, JSON.stringify(entries)); }
+  function getCombinedData() {
+    const local = entries.map(normalizeEntry);
+    const ids = new Set(local.map(e => e.rowId || e.id));
+    const sheetsOnly = sheetsData.map(normalizeEntry).filter(e => !ids.has(e.rowId || e.id));
+    return [...local, ...sheetsOnly].sort((a,b) => a.date.localeCompare(b.date));
+  }
+  function getFiltered() {
+    let data = getCombinedData();
+    const prod = $('filter-product').value, camp = $('filter-campaign').value, src = $('filter-source').value;
+    if (prod) data = data.filter(e => e.product === prod);
+    if (camp) data = data.filter(e => e.campaign === camp);
+    if (src === 'local') data = data.filter(e => e.source === 'local' || !e.source);
+    if (src === 'sheets') data = data.filter(e => e.source === 'sheets');
+    return data;
+  }
+  function updateSelect(id, items, label) {
+    const sel = $(id); const cur = sel.value;
+    sel.innerHTML = `<option value="">${label}</option>`;
+    items.forEach(v => { const opt = document.createElement('option'); opt.value = v; opt.textContent = v; if (v === cur) opt.selected = true; sel.appendChild(opt); });
+  }
+  function updateFilters() {
+    const all = getCombinedData();
+    updateSelect('filter-product', [...new Set(all.map(e => e.product).filter(p => p && p !== '—'))], 'Semua produk');
+    updateSelect('filter-campaign', [...new Set(all.map(e => e.campaign).filter(Boolean))], 'Semua campaign');
+  }
+  function render() {
+    updateFilters(); renderUnsyncBanner();
+    const data = getFiltered();
+    renderMetrics(data); renderRanks(data); renderTable(data); renderChart(data);
+    $('summary-section').style.display = data.length ? 'block' : 'none';
+  }
+  function renderMetrics(data) {
+    if (!data.length) return;
+    const totalSpend = data.reduce((s,e) => s + e.spend, 0);
+    const totalComm = data.reduce((s,e) => s + e.totalCommission, 0);
+    const profit = totalComm - totalSpend;
+    const ratio = totalSpend > 0 ? totalComm / totalSpend : 0;
+    const days = new Set(data.map(e => e.date)).size;
+    const clicks = data.reduce((s,e) => s + e.clicks, 0);
+    const roi = totalSpend > 0 ? (profit / totalSpend) * 100 : 0;
+    const verdictClass = totalSpend === 0 ? 'neutral' : ratio >= 1.5 ? 'good' : ratio >= 1 ? 'warn' : 'bad';
+    const verdictText = totalSpend === 0 ? 'Tambah data spend iklan untuk melihat analisis.' : ratio >= 1.5 ? `K/S Ratio ${ratio.toFixed(2)}x, kandidat scale. Profit ${shortMoney(profit)}.` : ratio >= 1 ? `K/S Ratio ${ratio.toFixed(2)}x, hampir impas. Optimasi creative/adset.` : `K/S Ratio ${ratio.toFixed(2)}x, masih boncos ${shortMoney(Math.abs(profit))}.`;
+    $('verdict-area').innerHTML = `<div class="verdict-bar ${verdictClass}">${verdictText}</div>`;
+    $('metrics-row').innerHTML = `
+      <div class="metric-card info"><div class="metric-label">Total Spend</div><div class="metric-val blue">${shortMoney(totalSpend)}</div><div class="metric-sub">${days} hari · ${data.length} baris</div></div>
+      <div class="metric-card"><div class="metric-label">Total Komisi D0-D7</div><div class="metric-val">${shortMoney(totalComm)}</div><div class="metric-sub">Atribusi 7 hari</div></div>
+      <div class="metric-card ${profit >= 0 ? 'good' : 'bad'}"><div class="metric-label">Profit / Rugi</div><div class="metric-val ${profit >= 0 ? 'green' : 'red'}">${profit >= 0 ? '+' : ''}${shortMoney(profit)}</div><div class="metric-sub">ROI: ${totalSpend > 0 ? roi.toFixed(1) + '%' : '—'}</div></div>
+      <div class="metric-card"><div class="metric-label">K/S Ratio 7 Hari</div><div class="metric-val ${ratio >= 1.5 ? 'green' : ratio >= 1 ? 'amber' : 'red'}">${totalSpend > 0 ? ratio.toFixed(2) + 'x' : '—'}</div><div class="metric-sub">Komisi / spend</div></div>
+      <div class="metric-card"><div class="metric-label">Klik</div><div class="metric-val">${clicks.toLocaleString('id-ID')}</div><div class="metric-sub">CPC: ${clicks ? money(totalSpend / clicks) : '—'}</div></div>`;
+  }
+  function groupBy(data, key) {
+    const map = new Map();
+    data.forEach(e => {
+      const name = e[key] || '—';
+      const cur = map.get(name) || { name, spend:0, comm:0, profit:0, clicks:0 };
+      cur.spend += e.spend; cur.comm += e.totalCommission; cur.profit += e.totalCommission - e.spend; cur.clicks += e.clicks;
+      map.set(name, cur);
+    });
+    return [...map.values()].sort((a,b) => b.profit - a.profit).slice(0,5);
+  }
+  function rankTable(title, rows) {
+    if (!rows.length) return '';
+    return `<div style="margin-bottom:16px"><div class="metric-label" style="margin-bottom:8px">${title}</div><div style="overflow-x:auto"><table><thead><tr><th>Nama</th><th class="num">Spend</th><th class="num">Komisi</th><th class="num">Profit</th><th class="num">K/S</th></tr></thead><tbody>${rows.map(x => { const r = x.spend ? x.comm / x.spend : 0; return `<tr><td>${esc(x.name)}</td><td class="num">${money(x.spend)}</td><td class="num">${money(x.comm)}</td><td class="profit-cell ${x.profit >= 0 ? 'pos' : 'neg'}">${x.profit >= 0 ? '+' : ''}${money(x.profit)}</td><td class="ratio-cell ${r >= 1.5 ? 'great' : r >= 1 ? 'ok' : 'bad'}">${r.toFixed(2)}x</td></tr>`; }).join('')}</tbody></table></div></div>`;
+  }
+  function renderRanks(data) {
+    $('rank-section').innerHTML = `<div class="card-title">Ranking cepat</div>${rankTable('Top Campaign', groupBy(data, 'campaign'))}${rankTable('Top Adset', groupBy(data, 'adset'))}${rankTable('Top Creative', groupBy(data, 'creative'))}`;
+  }
+  function renderTable(data) {
+    if (!data.length) { $('table-wrap').innerHTML = '<div class="empty-state"><div class="ei">[ ]</div><p>Belum ada data. Tambahkan data di atas atau muat dari Sheets.</p></div>'; return; }
+    const rows = [...data].reverse().map(e => {
+      const profit = e.totalCommission - e.spend;
+      const ratio = e.spend ? e.totalCommission / e.spend : 0;
+      const source = e.source || 'local';
+      const payload = esc(JSON.stringify({ id:e.id, rowId:e.rowId, date:e.date, product:e.product, spend:e.spend, commission:e.totalCommission, clicks:e.clicks, note:e.note }));
+      return `<tr>
+        <td>${fmtDate(e.date)}${e.inputTime ? `<br><span style="font-size:10px;color:var(--muted)">${esc(e.inputTime)}</span>` : ''}</td>
+        <td><span class="badge tag-badge">${esc(e.campaign || '—')}</span><br><span style="font-size:11px;color:var(--muted)">${esc(e.adset || '—')}</span></td>
+        <td><span class="badge tag-badge">${esc(e.creative || '—')}</span><br><span style="font-size:11px;color:var(--muted)">${esc(e.hook || '—')}</span></td>
+        <td><span class="badge product-badge">${esc(e.product)}</span> <span class="source-badge ${source === 'sheets' ? 'source-sheets' : 'source-local'}">${source === 'sheets' ? 'Sheets' : 'Lokal'}</span></td>
+        <td class="num">${money(e.spend)}</td><td class="num">${money(e.commissionD0)}</td><td class="num">${money(e.commissionD1)}</td><td class="num">${money(e.commissionD3)}</td><td class="num">${money(e.commissionD7)}</td><td class="num">${money(e.totalCommission)}</td>
+        <td class="profit-cell ${profit >= 0 ? 'pos' : 'neg'}">${profit >= 0 ? '+' : ''}${money(profit)}</td><td class="ratio-cell ${ratio >= 1.5 ? 'great' : ratio >= 1 ? 'ok' : 'bad'}">${ratio.toFixed(2)}x</td>
+        <td><span class="decision-badge ${decisionClass(e.status)}">${esc(e.status)}</span></td><td class="num">${e.clicks ? e.clicks.toLocaleString('id-ID') : '—'}</td>
+        <td style="text-align:center"><button class="btn btn-sm btn-danger" data-entry='${payload}' data-source="${esc(source)}">✕</button></td>
+      </tr>`;
+    }).join('');
+    $('table-wrap').innerHTML = `<div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Campaign / Adset</th><th>Creative / Hook</th><th>Produk</th><th class="num">Spend</th><th class="num">D0</th><th class="num">D1</th><th class="num">D3</th><th class="num">D7</th><th class="num">Total Komisi</th><th class="num">Profit</th><th class="num">K/S</th><th>Status</th><th class="num">Klik</th><th>Hapus</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    $('table-wrap').querySelectorAll('button[data-entry]').forEach(btn => btn.addEventListener('click', () => deleteEntry(JSON.parse(btn.dataset.entry), btn.dataset.source)));
+  }
+  function renderChart(data) {
+    if (!data.length || !window.Chart) return;
+    const labels = [], spend = [], comm = [], profit = [];
+    let s = 0, c = 0;
+    data.forEach(e => { s += e.spend; c += e.totalCommission; labels.push(new Date(e.date + 'T00:00:00').toLocaleDateString('id-ID', {day:'numeric', month:'short'})); spend.push(s); comm.push(c); profit.push(c - s); });
+    const dataset = {
+      labels,
+      datasets: [
+        { label:'Spend', data:spend, borderColor:'#2d5be3', backgroundColor:'rgba(45,91,227,.06)', fill:true, tension:.35, pointRadius:3, borderWidth:2 },
+        { label:'Komisi D0-D7', data:comm, borderColor:'#1a7a52', backgroundColor:'rgba(26,122,82,.06)', fill:true, tension:.35, pointRadius:3, borderWidth:2 },
+        { label:'Profit/Rugi', data:profit, borderColor:profit[profit.length-1] < 0 ? '#b83232' : '#1a7a52', backgroundColor:'rgba(184,50,50,.04)', fill:true, tension:.35, pointRadius:3, borderWidth:2, borderDash:[5,3] }
+      ]
+    };
+    if (chart) { chart.data = dataset; chart.update(); return; }
+    chart = new Chart($('mainChart').getContext('2d'), { type:'line', data:dataset, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{ ticks:{ callback:(v)=> shortMoney(v).replace('Rp ','') } } } } });
+  }
+  function exportCSV() {
+    const data = getCombinedData();
+    if (!data.length) { toast('⚠ Tidak ada data', 'error'); return; }
+    const header = ['Tanggal','Campaign','Adset','Creative','Hook','Produk','Link Affiliate','Spend Rp','Komisi D0','Komisi D1','Komisi D3','Komisi D7','Total Komisi','Profit/Rugi Rp','K/S Ratio','Klik','Status','Catatan','Sumber'];
+    const rows = data.map(e => [e.date,e.campaign,e.adset,e.creative,e.hook,e.product,e.affiliateLink,e.spend,e.commissionD0,e.commissionD1,e.commissionD3,e.commissionD7,e.totalCommission,e.totalCommission-e.spend,e.spend?(e.totalCommission/e.spend).toFixed(2):'—',e.clicks,e.status,e.note,e.source].map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(','));
+    const blob = new Blob([[header.join(','), ...rows].join('\n')], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tracker-iklan-shopee-v4.csv'; a.click();
+    toast('✓ CSV didownload', 'success');
+  }
+
+  init();
+})();
 </script>
 </body>
 </html>
