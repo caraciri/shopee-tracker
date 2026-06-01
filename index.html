@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tracker Iklan — Meta Ads × Shopee Affiliate</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </head>
 <body>
   <div class="topbar">
-    <div class="logo">META<span>×</span>SHOPEE <span style="font-weight:400;color:var(--m);font-size:12px">TRACKER v1.5</span></div>
+    <div class="logo">META<span>×</span>SHOPEE <span style="font-weight:400;color:var(--m);font-size:12px">TRACKER v1.6</span></div>
     <div class="topbar-right">
       <div class="sync-badge" id="sync-badge"><div class="sync-dot"></div><span id="sync-label">Belum terhubung</span></div>
       <button class="btn btn-sm" id="btn-export">↓ CSV</button>
@@ -88,6 +88,7 @@
 
     <div id="summary" style="display:none">
       <div id="verdict"></div>
+      <div class="status-dashboard" id="status-dashboard"></div>
       <div class="metrics" id="metrics"></div>
       <div class="card" id="rank"></div>
       <div class="card">
@@ -103,6 +104,7 @@
           <select id="filter-product" style="font-size:12px;padding:5px 10px;border:1px solid var(--b);border-radius:6px;background:var(--s)"><option value="">Semua produk</option></select>
           <select id="filter-campaign" style="font-size:12px;padding:5px 10px;border:1px solid var(--b);border-radius:6px;background:var(--s)"><option value="">Semua campaign</option></select>
           <select id="filter-source" style="font-size:12px;padding:5px 10px;border:1px solid var(--b);border-radius:6px;background:var(--s)"><option value="">Semua sumber</option><option value="local">Lokal saja</option><option value="sheets">Sheets saja</option></select>
+          <select id="filter-status" style="font-size:12px;padding:5px 10px;border:1px solid var(--b);border-radius:6px;background:var(--s)"><option value="">Semua status</option><option value="SCALE">SCALE</option><option value="HOLD">HOLD</option><option value="WATCH">WATCH</option><option value="KILL">KILL</option></select>
         </div>
       </div>
       <div id="table"><div class="empty">Belum ada data. Tambahkan data di atas atau muat dari Sheets.</div></div>
@@ -110,6 +112,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="app.js?v=15"></script>
+  <script src="app.js?v=16"></script>
 </body>
 </html>
