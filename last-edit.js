@@ -72,7 +72,6 @@
     return new Intl.DateTimeFormat('id-ID', {
       day: '2-digit',
       month: 'short',
-      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     }).format(date);
@@ -92,24 +91,18 @@
     const table = document.querySelector('#table table');
     if (!table) return;
 
-    const headerRow = table.querySelector('thead tr');
-    if (headerRow && !headerRow.querySelector('.last-edit-head')) {
-      const th = document.createElement('th');
-      th.className = 'last-edit-head';
-      th.textContent = 'Terakhir Edit';
-      headerRow.insertBefore(th, headerRow.lastElementChild);
-    }
+    table.querySelectorAll('.last-edit-head,.last-edit-cell').forEach((element) => element.remove());
 
     table.querySelectorAll('tbody tr').forEach((row) => {
-      if (row.querySelector('.last-edit-cell')) return;
       const actionCell = row.lastElementChild;
       const editButton = row.querySelector('[data-edit]');
-      if (!actionCell || !editButton) return;
+      if (!actionCell || !editButton || actionCell.querySelector('.last-edit-inline')) return;
+
       const payload = parse(editButton.dataset.edit, {});
-      const td = document.createElement('td');
-      td.className = 'last-edit-cell';
-      td.innerHTML = `<span class="last-edit-text">${formatDateTime(payload.updatedAt)}</span>`;
-      row.insertBefore(td, actionCell);
+      const info = document.createElement('div');
+      info.className = 'last-edit-inline';
+      info.textContent = 'Edit: ' + formatDateTime(payload.updatedAt);
+      actionCell.appendChild(info);
     });
   }
 
