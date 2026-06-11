@@ -43,7 +43,7 @@
       return {
         ...row,
         createdAt: row.createdAt || prev?.createdAt || (isNew ? now : ''),
-        updatedAt: isNew ? now : (isEdited || changed ? now : (row.updatedAt || prev?.updatedAt || ''))
+        updatedAt: isNew ? '' : (isEdited || changed ? now : (row.updatedAt || prev?.updatedAt || ''))
       };
     });
   }
@@ -66,9 +66,9 @@
   };
 
   function formatDateTime(iso) {
-    if (!iso) return 'Belum diedit';
+    if (!iso) return '';
     const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) return 'Belum diedit';
+    if (Number.isNaN(date.getTime())) return '';
     return new Intl.DateTimeFormat('id-ID', {
       day: '2-digit',
       month: 'short',
@@ -99,9 +99,12 @@
       if (!actionCell || !editButton || actionCell.querySelector('.last-edit-inline')) return;
 
       const payload = parse(editButton.dataset.edit, {});
+      const text = formatDateTime(payload.updatedAt);
+      if (!text) return;
+
       const info = document.createElement('div');
       info.className = 'last-edit-inline';
-      info.textContent = 'Edit: ' + formatDateTime(payload.updatedAt);
+      info.textContent = 'Edit: ' + text;
       actionCell.appendChild(info);
     });
   }
