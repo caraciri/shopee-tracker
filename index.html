@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tracker Iklan — Meta Ads × Shopee Affiliate</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=16">
+  <link rel="stylesheet" href="style.css?v=17">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </head>
 <body>
   <div class="topbar">
-    <div class="logo">META<span>×</span>SHOPEE <span style="font-weight:400;color:var(--m);font-size:12px">TRACKER v1.6</span></div>
+    <div class="logo">META<span>×</span>SHOPEE <span class="version">TRACKER v1.6</span></div>
     <div class="topbar-right">
       <div class="sync-badge" id="sync-badge"><div class="sync-dot"></div><span id="sync-label">Belum terhubung</span></div>
       <button class="btn btn-sm" id="btn-export">↓ CSV</button>
@@ -27,11 +27,11 @@
         <li>Deploy sebagai <code>Web App</code></li>
         <li>Paste URL Web App dan token rahasia di bawah ini.</li>
       </ol>
-      <div class="row" style="margin-top:12px">
+      <div class="row mt-12">
         <input class="url-input" id="url" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
         <input type="password" class="url-input" id="token" placeholder="Token rahasia">
         <button class="btn btn-primary" id="btn-test">Simpan & Test Koneksi</button>
-        <button class="btn" id="btn-close" style="display:none">Tutup</button>
+        <button class="btn hidden" id="btn-close">Tutup</button>
       </div>
     </div>
 
@@ -53,12 +53,12 @@
         <div class="field"><label>Komisi D7</label><div class="wrap"><span class="pre">Rp</span><input type="number" id="d7" min="0" placeholder="0"></div></div>
         <div class="field"><label>Klik</label><div class="wrap"><input type="number" id="clicks" min="0" placeholder="0"><span class="suf">klik</span></div></div>
         <div class="field"><label>Catatan</label><div class="wrap"><input id="note" placeholder="misal: ganti creative"></div></div>
-        <div class="field" style="align-self:end"><button class="btn btn-primary" id="btn-add" style="height:38px;width:100%">+ Tambah & Sync</button></div>
-        <div class="field" style="align-self:end"><button class="btn" id="btn-cancel-edit" style="height:38px;width:100%;display:none">Batal Edit</button></div>
+        <div class="field align-end"><button class="btn btn-primary full-btn" id="btn-add">+ Tambah & Sync</button></div>
+        <div class="field align-end"><button class="btn full-btn hidden" id="btn-cancel-edit">Batal Edit</button></div>
       </div>
     </div>
 
-    <div class="card" id="history-card" style="display:none">
+    <div class="card hidden" id="history-card">
       <div class="title">Muat histori dari Google Sheets</div>
       <div class="tabs">
         <button class="tab" data-range="today">Hari Ini</button>
@@ -70,9 +70,9 @@
       </div>
       <div class="custom" id="custom">
         <span>Dari</span>
-        <div class="wrap" style="width:auto"><input type="date" id="start" style="width:140px"></div>
+        <div class="wrap date-wrap"><input type="date" id="start"></div>
         <span>sampai</span>
-        <div class="wrap" style="width:auto"><input type="date" id="end" style="width:140px"></div>
+        <div class="wrap date-wrap"><input type="date" id="end"></div>
       </div>
       <div class="row">
         <button class="btn btn-success" id="btn-load">↓ Muat Data dari Sheets</button>
@@ -86,25 +86,25 @@
       <button class="btn btn-sm" id="btn-retry">↺ Sync Ulang</button>
     </div>
 
-    <div id="summary" style="display:none">
+    <div id="summary" class="hidden">
       <div id="verdict"></div>
       <div class="status-dashboard" id="status-dashboard"></div>
       <div class="metrics" id="metrics"></div>
       <div class="card" id="rank"></div>
       <div class="card">
         <div class="title">Grafik kumulatif 7 hari</div>
-        <div style="height:220px"><canvas id="chart"></canvas></div>
+        <div class="chart-box"><canvas id="chart"></canvas></div>
       </div>
     </div>
 
     <div class="table-card">
       <div class="table-head">
-        <div class="title" style="margin:0">Riwayat data</div>
+        <div class="title no-margin">Riwayat data</div>
         <div class="row">
-          <select id="filter-product" style="font-size:12px;padding:5px 10px;border:1px solid var(--b);border-radius:6px;background:var(--s)"><option value="">Semua produk</option></select>
-          <select id="filter-campaign" style="font-size:12px;padding:5px 10px;border:1px solid var(--b);border-radius:6px;background:var(--s)"><option value="">Semua campaign</option></select>
-          <select id="filter-source" style="font-size:12px;padding:5px 10px;border:1px solid var(--b);border-radius:6px;background:var(--s)"><option value="">Semua sumber</option><option value="local">Lokal saja</option><option value="sheets">Sheets saja</option></select>
-          <select id="filter-status" style="font-size:12px;padding:5px 10px;border:1px solid var(--b);border-radius:6px;background:var(--s)"><option value="">Semua status</option><option value="SCALE">SCALE</option><option value="HOLD">HOLD</option><option value="WATCH">WATCH</option><option value="KILL">KILL</option></select>
+          <select class="select-sm" id="filter-product"><option value="">Semua produk</option></select>
+          <select class="select-sm" id="filter-campaign"><option value="">Semua campaign</option></select>
+          <select class="select-sm" id="filter-source"><option value="">Semua sumber</option><option value="local">Lokal saja</option><option value="sheets">Sheets saja</option></select>
+          <select class="select-sm" id="filter-status"><option value="">Semua status</option><option value="SCALE">SCALE</option><option value="HOLD">HOLD</option><option value="WATCH">WATCH</option><option value="KILL">KILL</option></select>
         </div>
       </div>
       <div id="table"><div class="empty">Belum ada data. Tambahkan data di atas atau muat dari Sheets.</div></div>
@@ -112,6 +112,6 @@
   </div>
 
   <div class="toast" id="toast"></div>
-  <script src="app.js?v=16"></script>
+  <script src="app.js?v=17"></script>
 </body>
 </html>
